@@ -1,0 +1,13 @@
+{
+	"base": {
+		"service":[
+			{
+				"interface": "ens224",
+				"port": [
+					"1521", "1522"
+				]
+			}
+		],
+		"writingFileSecond": 30
+	}
+}

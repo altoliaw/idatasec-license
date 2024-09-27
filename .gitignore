@@ -1,0 +1,8 @@
+# Directories
+Bin
+Vendors
+build
+
+# Files
+*.o
+*.gz

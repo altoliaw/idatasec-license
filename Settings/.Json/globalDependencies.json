@@ -1,0 +1,34 @@
+{
+	"dependencies": [
+		{
+			"name": "cJson",
+			"download": "git clone https://github.com/DaveGamble/cJSON.git {{name}}",
+			"command": "make",
+			"includes": [
+				"cJSON.h"
+			],
+			"libs": [
+				"libcjson.a"
+			],
+			"reference": "https://github.com/DaveGamble/cJSON",
+			"remove": "rm -rf {{name}}",
+			"windows": true,
+			"linux": true
+		},
+		{
+			"name": "nPcap",
+			"download": "wget -O {{name}}/tmp.zip https://npcap.com/dist/npcap-sdk-1.13.zip",
+			"command": "unzip tmp.zip",
+			"includes": [
+				"Include/*"
+			],
+			"libs": [
+				"Lib/*"
+			],
+			"reference": "https://npcap.com/#download",
+			"remove": "rm -rf {{name}}",
+			"windows": true,
+			"linux": false
+		}
+	]
+}

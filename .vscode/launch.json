@@ -1,0 +1,50 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "SqloSnifferService GDB (root)",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/SecuEyes",
+			"environment": [
+				{
+					"name": "ROOT_PROJECT_DIR",
+					"value": "/home/dbsecure/dbaegis_pfzc"
+				}, 
+				{
+					"name": "PROJECT_NAME",
+					"value": "dbAegis"
+				},
+				{
+					"name": "PROJECT_DIR",
+					"value": "/home/dbsecure/dbaegis_pfzc"
+				},
+				{
+					"name": "COS_DIR",
+					"value": "/usr/local/3rdParty.64"
+				},
+				{
+					"name": "SDR_DIR",
+					"value": "/home/dbsecure/dbaegis_pfzc/SecuEyes"
+				},
+				{
+					"name": "CB_DEBUG_OUTPUT",
+					"value": "1"
+				}				
+			],
+			"externalConsole": false,
+			"MIMode": "gdb",
+			"miDebuggerPath": "${workspaceFolder}/Tests/Shells/rootGdb.sh",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": false
+				}
+			]
+		},
+	]
+}
