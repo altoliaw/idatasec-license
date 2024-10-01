@@ -10,25 +10,65 @@
 			"libs": [
 				"libcjson.a"
 			],
+			"others": [
+			],
 			"reference": "https://github.com/DaveGamble/cJSON",
 			"remove": "rm -rf {{name}}",
 			"windows": true,
 			"linux": true
 		},
 		{
-			"name": "nPcap",
-			"download": "wget -O {{name}}/tmp.zip https://npcap.com/dist/npcap-sdk-1.13.zip",
-			"command": "unzip tmp.zip",
+			"name": "libGpG-Error",
+			"download": "wget -O {{name}}/tmp.tar.bz2 https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.50.tar.bz2",
+			"command": "tar jxvf tmp.tar.bz2 && cd libgpg-error-1.50 && ./configure --prefix={{projectVendors}}/{{name}} --enable-install-gpg-error-config && make && make install && cd ../",
 			"includes": [
-				"Include/*"
+				"include/*"
 			],
 			"libs": [
-				"Lib/*"
+				"lib/*"
 			],
-			"reference": "https://npcap.com/#download",
+			"others": [
+				"bin"
+			],
+			"reference": "https://gnupg.org/download/index.html",
+			"remove": "rm -rf {{name}}",
+			"windows": false,
+			"linux": true
+		},
+    	{
+			"name": "libGcrypt",
+			"download": "wget -O {{name}}/tmp.tar.bz2 https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.0.tar.bz2",
+			"command": "tar jxvf tmp.tar.bz2 && cd libgcrypt-1.11.0 && CPPFLAGS='-I{{projectVendors}}/libGpG-Error/Includes' LDFLAGS='-L{{projectVendors}}/libGpG-Error/Libs' ./configure --prefix={{projectVendors}}/{{name}} --with-gpg-error-prefix={{projectVendors}}/libGpG-Error && make && make install && cd ../",
+			"includes": [
+				"include/*"
+			],
+			"libs": [
+				"lib/*"
+			],
+			"others": [
+				"bin"
+			],
+			"reference": "https://gnupg.org/download/index.html",
+			"remove": "rm -rf {{name}}",
+			"windows": false,
+			"linux": true
+		},
+		{
+			"name": "libUtil-Linux",
+			"download": "git clone https://github.com/util-linux/util-linux.git {{name}}",
+			"command": "./autogen.sh && ./configure --prefix={{projectVendors}}/{{name}} --without-ncurses --disable-all-programs --enable-libuuid && make && make install",
+			"includes": [
+				"include/uuid"
+			],
+			"libs": [
+				".libs/*"
+			],
+			"others": [
+			],
+			"reference": "https://github.com/util-linux/util-linux.",
 			"remove": "rm -rf {{name}}",
 			"windows": true,
-			"linux": false
+			"linux": true
 		}
 	]
 }

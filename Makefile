@@ -108,6 +108,10 @@ vendor: ${projectDir}/Folders
     # Creating the vendor and related folders by using the function, dependenciesTraversal, 
     # from the shell script, installVendor.sh, and determining the existence of the file & initializing the file
 	@source ${projectDir}/Shells/installVendor.sh && dependenciesTraversal "${projectDir}/Settings/.Json/globalDependencies.json" "${projectDir}/${Vendors}/.${Vendors}.json"
+# This file is for restoring the Makefiles' variables in the compilied process
+	@rm -f ${projectDir}/tmp.mk
+# This file is for restoring the common variables for the compiler
+	@rm -f ${projectDir}/commonTmp.mk
 
 # Displaying the project of the working directory
 .Phony: information
