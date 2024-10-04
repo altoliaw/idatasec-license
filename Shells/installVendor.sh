@@ -156,33 +156,15 @@ function dependenciesTraversal() {
             command=$(echo "$command" | sed 's/"//g')
             remove=$(echo "$remove" | sed 's/"//g')
 
-            # Replacing the {{name}} to the folder name 
-            download=$(echo "$download" | sed "s/{{name}}/$folderName/g")
-            command=$(echo "$command" | sed "s/{{name}}/$folderName/g")
-            remove=$(echo "$remove" | sed "s/{{name}}/$folderName/g")
-
-            # Replacing the {{includes}} to the folder, "Includes"
-            download=$(echo "$download" | sed "s/{{includes}}/Includes/g")
-            command=$(echo "$command" | sed "s/{{includes}}/Includes/g")
-            remove=$(echo "$remove" | sed "s/{{includes}}/Includes/g")
-
-            # Replacing the {{libs}} to the folder, "Libs"
-            download=$(echo "$download" | sed "s/{{libs}}/Libs/g")
-            command=$(echo "$command" | sed "s/{{libs}}/Libs/g")
-            remove=$(echo "$remove" | sed "s/{{libs}}/Libs/g")
-
-            # Replacing the {{name.tmp}} to $name.tmp; verifying if downloading, commanding & removing location 
-            # shall be replaced to the $name.tmp (because the folder
+            # Verifying if downloading, commanding & removing location shall be replaced to the $name.tmp (because the folder
             # $name is for the formal components where is used for the project)
-            download=$(echo "$download" | sed "s/{{name.tmp}}/$folderName.tmp/g")
-            command=$(echo "$command" | sed "s/{{name.tmp}}/$folderName.tmp/g")
-            remove=$(echo "$remove" | sed "s/{{name.tmp}}/$folderName.tmp/g")
+            download=$(echo "$download" | sed "s/{{name}}/$folderName.tmp/g")
+            command=$(echo "$command" | sed "s/{{name}}/$folderName.tmp/g")
+            remove=$(echo "$remove" | sed "s/{{name}}/$folderName.tmp/g")
 
             # Verifying if commanded string contains {{projectVendor}}, the {{projectVendor}} shall be replaced
             # to the path of the project's Vendors folder
-            download=$(echo "$download" | sed "s|{{projectVendors}}|$(pwd)/Vendors|g")
             command=$(echo "$command" | sed "s|{{projectVendors}}|$(pwd)/Vendors|g")
-            remove=$(echo "$remove" | sed "s|{{projectVendors}}|$(pwd)/Vendors|g")
 
 
             # Executing the download, command, installation and removing the download at last

@@ -8,8 +8,8 @@ set(STATIC_LIB_PATH ${CMAKE_BINARY_DIR}/Vendors)
 target_include_directories(Test_License PUBLIC ../Headers)
 
 target_link_libraries(Test_License
-	Models.Licenses
-	${STATIC_LIB_PATH}/libGcrypt/Libs/libgcrypt.a
+    Models.Licenses
+    ${STATIC_LIB_PATH}/libGcrypt/Libs/libgcrypt.a
     ${STATIC_LIB_PATH}/libGpG-Error/Libs/libgpg-error.a
     cmocka
 )
