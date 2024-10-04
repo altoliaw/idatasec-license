@@ -2,7 +2,7 @@
 	"dependencies": [
 		{
 			"name": "cJson",
-			"download": "git clone https://github.com/DaveGamble/cJSON.git {{name}}",
+			"download": "git clone https://github.com/DaveGamble/cJSON.git {{name.tmp}}",
 			"command": "make",
 			"includes": [
 				"cJSON.h"
@@ -13,60 +13,52 @@
 			"others": [
 			],
 			"reference": "https://github.com/DaveGamble/cJSON",
-			"remove": "rm -rf {{name}}",
+			"remove": "rm -rf {{name.tmp}}",
 			"windows": true,
 			"linux": true
 		},
 		{
 			"name": "libGpG-Error",
-			"download": "wget -O {{name}}/tmp.tar.bz2 https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.50.tar.bz2",
-			"command": "tar jxvf tmp.tar.bz2 && cd libgpg-error-1.50 && ./configure --prefix={{projectVendors}}/{{name}} --enable-install-gpg-error-config && make && make install && cd ../",
+			"download": "wget -O {{name.tmp}}/tmp.tar.bz2 https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.50.tar.bz2",
+			"command": "tar jxvf tmp.tar.bz2 && cd libgpg-error-1.50 && ./configure --prefix={{projectVendors}}/{{name}} --includedir={{projectVendors}}/{{name}}/{{includes}} --libdir={{projectVendors}}/{{name}}/{{libs}} --enable-install-gpg-error-config --enable-static --disable-shared && make && make install && cd ../",
 			"includes": [
-				"include/*"
 			],
 			"libs": [
-				"lib/*"
 			],
 			"others": [
-				"bin"
 			],
 			"reference": "https://gnupg.org/download/index.html",
-			"remove": "rm -rf {{name}}",
+			"remove": "rm -rf {{name.tmp}}",
 			"windows": false,
 			"linux": true
 		},
     	{
 			"name": "libGcrypt",
-			"download": "wget -O {{name}}/tmp.tar.bz2 https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.0.tar.bz2",
-			"command": "tar jxvf tmp.tar.bz2 && cd libgcrypt-1.11.0 && CPPFLAGS='-I{{projectVendors}}/libGpG-Error/Includes' LDFLAGS='-L{{projectVendors}}/libGpG-Error/Libs' ./configure --prefix={{projectVendors}}/{{name}} --with-gpg-error-prefix={{projectVendors}}/libGpG-Error && make && make install && cd ../",
+			"download": "wget -O {{name.tmp}}/tmp.tar.bz2 https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.0.tar.bz2",
+			"command": "tar jxvf tmp.tar.bz2 && cd libgcrypt-1.11.0 && CPPFLAGS='-I{{projectVendors}}/libGpG-Error/{{includes}}' LDFLAGS='-L{{projectVendors}}/libGpG-Error/{{libs}}' ./configure --prefix={{projectVendors}}/{{name}} --includedir={{projectVendors}}/{{name}}/{{includes}} --libdir={{projectVendors}}/{{name}}/{{libs}} --with-gpg-error-prefix={{projectVendors}}/libGpG-Error --enable-static --disable-shared && make && make install && cd ../",
 			"includes": [
-				"include/*"
 			],
 			"libs": [
-				"lib/*"
 			],
 			"others": [
-				"bin"
 			],
 			"reference": "https://gnupg.org/download/index.html",
-			"remove": "rm -rf {{name}}",
+			"remove": "rm -rf {{name.tmp}}",
 			"windows": false,
 			"linux": true
 		},
 		{
 			"name": "libUtil-Linux",
-			"download": "git clone https://github.com/util-linux/util-linux.git {{name}}",
-			"command": "./autogen.sh && ./configure --prefix={{projectVendors}}/{{name}} --without-ncurses --disable-all-programs --enable-libuuid && make && make install",
+			"download": "git clone https://github.com/util-linux/util-linux.git {{name.tmp}}",
+			"command": "./autogen.sh && ./configure --prefix={{projectVendors}}/{{name}} --includedir={{projectVendors}}/{{name}}/{{includes}} --libdir={{projectVendors}}/{{name}}/{{libs}} --without-ncurses --disable-all-programs --enable-libuuid && make && make install",
 			"includes": [
-				"include/uuid"
 			],
 			"libs": [
-				".libs/*"
 			],
 			"others": [
 			],
 			"reference": "https://github.com/util-linux/util-linux.",
-			"remove": "rm -rf {{name}}",
+			"remove": "rm -rf {{name.tmp}}",
 			"windows": true,
 			"linux": true
 		}
