@@ -4,12 +4,12 @@ project(idatasec-license)
 #setting standard liberary, C
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_EXTENSIONS ON)
 
 # [C++ Settings]
 ## GoogleTest requires at least C++14
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # [Testing Flag]
 ## Setting the option to determine whether the test is enabled or the compile (for windows) shall be executed
@@ -57,6 +57,6 @@ add_subdirectory(Models)
 ## When the testing function is set as "ON"
 if (BUILD_TEST)
   add_subdirectory(Tests)
-else() # The necessary directory when compiling on Windows
-  add_subdirectory(Apps)
+# else() # The necessary directory when compiling on Windows
+#   add_subdirectory(Apps)
 endif()

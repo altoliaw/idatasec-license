@@ -93,7 +93,12 @@
     "xutility": "cpp",
     "test_license.h": "c",
     "license.h": "c",
-    "stdarg.h": "c"
+    "stdarg.h": "c",
+    "if.h": "c",
+    "unistd.h": "c",
+    "test_time.h": "c",
+    "stddef.h": "c",
+    "time.h": "c"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",
