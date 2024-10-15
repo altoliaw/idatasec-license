@@ -39,6 +39,8 @@ void Test_Time_getStringToEpoch(void** State) {
     // comes from the class method
     assert_int_equal(utc, resultTime);
 
+    resultTime = instance.getStringToEpoch(&instance, "2025-10-10 00:00:00");
+
     // Releasing the static variable
     instance.releaseInitializedFileParserInitialization(&instance);
     Time_Destrcut(&instance);
@@ -58,6 +60,7 @@ void Test_Time_getEpochToString(void** State) {
     // comes from the class method
     assert_int_equal(utc, resultTime);
 
+    // fprintf(stderr, "%lu\n", resultTime);
     unsigned char* timeEpochString = NULL;
     instance.getEpochToString(&instance, "%Y-%m-%d %H:%M:%S", UTC, resultTime, &timeEpochString);
 	assert_string_equal(timeEpochString, timeUTCString);

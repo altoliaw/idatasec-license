@@ -45,10 +45,11 @@ typedef enum TimeZone Timezone;
  * Time zone definition
  */
 enum TimeZone{
-    UTC = 0,  // Coordinated Universal Time
-    GMT,      // Greenwich Mean Time
-    PST,      // North American Pacific Standard Time
-    NST       // Newfoundland Standard Time
+    LOCAL = -1, // The local time
+    UTC = 0,    // Coordinated Universal Time
+    GMT,        // Greenwich Mean Time
+    PST,        // North American Pacific Standard Time
+    NST         // Newfoundland Standard Time
 };
 
 struct Time {

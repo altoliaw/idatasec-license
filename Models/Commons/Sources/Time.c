@@ -84,6 +84,7 @@ static long getEpoch(Time* instance, time_t timeInstance) {
 /**
  * Transforming the POSIX ("%Y-%m-%d %H:%M:%S") time string into the epoch from OS time setting
  *
+ * @param instance [Time*] The instance of the Time class
  * @param timeString [const char*] The time string (e.g., "2024-06-07 15:30:00")
  * @return [long] The epoch; if the value is -1, the error occurs
  */
@@ -114,7 +115,8 @@ static long getStringToEpoch(Time* instance, const char* timeString) {
 }
 
 /**
- * Obtaining the time string with user-defined format
+ * Obtaining the time string by transforming the unix timestamp with the users specified; that implies that a UTC timestamp
+ * will be transformed into the specified time string in the specified zone
  *
  * @param instance [Time*] The pointer to the time instance
  * @param format [const char*] The layout format presented by using POSIX time format ("%Y-%m-%d %H:%M:%S")
@@ -134,6 +136,11 @@ static void getEpochToString(Time* instance, const char* format, Timezone zone, 
 
     // Setting the new time zone
     switch (zone) {
+        case LOCAL: // The local time
+            tmpTimeEpoch = (time_t)timeEpoch;
+            tm = localtime(&tmpTimeEpoch);
+            break;
+
         case UTC:
         case GMT:
             tmpTimeEpoch = (time_t)timeEpoch;
@@ -152,9 +159,9 @@ static void getEpochToString(Time* instance, const char* format, Timezone zone, 
             tm = localtime(&tmpTimeEpoch);
             break;
 
-        default:  // Same as the UTC/GMT
+        default:  // Using the local time
             tmpTimeEpoch = (time_t)timeEpoch;
-            tm = gmtime(&tmpTimeEpoch);
+            tm = localtime(&tmpTimeEpoch);
     }
 
     // Copying the time string into the buffer

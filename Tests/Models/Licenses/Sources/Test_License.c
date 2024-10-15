@@ -49,9 +49,10 @@ void Test_License_generateLicenseKeyProcess(void** State) {
 
 	License instance;
 	License_Constrcut(&instance);
-	const unsigned char* path = "../../../../Outputs/aes256Key.aes";
+	const unsigned char* aesPath = "../../../../Outputs/aes256Key.aes";
+	const unsigned char* licensePath = "../../../../Outputs/license.key";
 	const unsigned char* deadline = "2025-11-12 00:00:00";
-	instance.generateLicenseKey(&instance, deadline, path);
+	instance.generateLicenseKey(&instance, deadline, aesPath, licensePath);
 	
 	License_Destrcut(&instance);
 }

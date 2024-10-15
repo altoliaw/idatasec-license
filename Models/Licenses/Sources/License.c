@@ -5,7 +5,7 @@
 
 static char generateAES256Key(License*, const unsigned char*, const unsigned char*);
 static char getMacAddress(const unsigned char*, unsigned char*, const unsigned int);
-static char generateLicenseKey(License*, const unsigned char*, const unsigned char*);
+static char generateLicenseKey(License*, const unsigned char*, const unsigned char*, const unsigned char*);
 static void encryptLicense(const unsigned char*, const unsigned char*, unsigned char*);
 static void applyPkcs7Padding(const unsigned char*, size_t, unsigned char**, size_t*);
 static int aes256CbcEncrypt(const unsigned char*, size_t, const unsigned char*, const unsigned char*, unsigned char**, size_t*);
@@ -70,7 +70,7 @@ static char generateAES256Key(License* instance, const unsigned char* interfaceN
 
     // To avoid the "\0" character when executing the last randomBuffer, this will lead the '\0' will be put in
     // the wrong memory location and be exceed the boundary.
-    unsigned char tmpBuffer [3] = {'\0'};
+    unsigned char tmpBuffer[3] = {'\0'};
     for (unsigned int i = 0, j = 0; i < remainderHexSize; i++) {
         j = sprintf(tmpBuffer, "%02x", randomBuffer[i]);
         memcpy((instance->secretKey) + cumulativeLength, tmpBuffer, 2);
@@ -104,6 +104,7 @@ static char generateAES256Key(License* instance, const unsigned char* interfaceN
 
     if (fileDescriptor != NULL) {
         fclose(fileDescriptor);
+        fileDescriptor = NULL;
     }
     return 0x0;
 }
@@ -148,34 +149,122 @@ static char getMacAddress(const unsigned char* interfaceName, unsigned char* mac
  *
  * @param instance [License*] The license object
  * @param deadline [const unsigned char*] The time in a string format, the format is "YYYY-mm-dd HH:MM:SS"
- * @param path [const unsigned char*] The file path for reserving the key information of the license
+ * @param aesKeyPath [const unsigned char*] The file path for reserving the aes key information of the AES key
+ * @param licenseKeyPath [const unsigned char*] The file path for reserving the key information of the license
  * @return [char] The success flag; when the value is equal to 0x0, the process is success; otherwise, the process
  * is failure
  */
 static char generateLicenseKey(License* instance,
                                const unsigned char* deadline,
-                               const unsigned char* path) {
+                               const unsigned char* aesKeyPath,
+                               const unsigned char* licenseKeyPath) {
     char isSuccess = 0x0;
     // Opening the aeskey
-    FILE* fileDescriptor = fopen((const char*)path, "rb");
-    if(fileDescriptor == NULL) {
+    FILE* fileDescriptor = fopen((const char*)aesKeyPath, "rb");
+    if (fileDescriptor == NULL) {
         fprintf(stderr, "The aes key file does not exist.\n");
         return (isSuccess = 0x1);
     }
 
     // Only one line shall be read.
-    unsigned char aesKey [LICENSE_AES_KEY_SIZE] = {'\0'};
-    if(fgets(aesKey, LICENSE_AES_KEY_SIZE, fileDescriptor) == NULL) {
+    unsigned char aesKey[LICENSE_AES_KEY_SIZE] = {'\0'};
+    // "fgets(.)" will obtain n - 1 characters; that is when users feel like obtaining n
+    // characters, the second argument in the fgets(.) shall be equal to n + 1
+    if (fgets(aesKey, LICENSE_AES_KEY_SIZE + 1, fileDescriptor) == NULL) {
         fprintf(stderr, "The aes key file does not exist.\n");
         return (isSuccess = 0x1);
     }
 
-    // fprintf(stderr, "%.*s\n", LICENSE_AES_KEY_SIZE, aesKey);
+    if (fileDescriptor != NULL) {
+        fclose(fileDescriptor);
+        fileDescriptor = NULL;
+    }
 
+    // Fetching the local current time
+    Time timeInstance;
+    Time_Constrcut(&timeInstance);
+    long currentTime = timeInstance.getEpoch(&timeInstance, 0);  // Obtaining the current time (i.e., the second argument is equal to 0)
+    Time_Destrcut(&timeInstance);
+    // Defining the license key
+    unsigned char licenseKey[LICENSE_LICENSE_KEY_LENGTH] = {'\0'};
+    memcpy(licenseKey, aesKey, LICENSE_AES_KEY_SIZE);  // Copying the AES key
+    int cumulativeLength = LICENSE_AES_KEY_SIZE;
+    {  // This block is organized like the TNS protocol (Oracle)
+        // The string format of the current time
+        unsigned char currentTimeString[16] = {'\0'};
+        // The first length from calculating the currentTime
+        int firstLength = sprintf(currentTimeString, "%lu", currentTime);
+        // The second length from the first length above
+        int secondLength = sprintf(currentTimeString, "%d", firstLength);
+        // Adding the secondLength into the licenseKey storage
+        cumulativeLength += sprintf(licenseKey + cumulativeLength, "%d", secondLength);
+        // Adding the firstLength into the licenseKey storage
+        cumulativeLength += sprintf(licenseKey + cumulativeLength, "%d", firstLength);
+        // Adding the current time into the licenseKey storage
+        cumulativeLength += sprintf(licenseKey + cumulativeLength, "%lu", currentTime);
+    }
 
+    // fprintf(stderr, "%d\n", cumulativeLength);
 
+    // To ensure that the cumulativeLength now is even; otherwise, adding 0 after the length of the current licenseKey
+    if (cumulativeLength % 2 != 0) {
+        licenseKey[cumulativeLength] = '0';
+        cumulativeLength++;
+    }
 
-    // time_t expiryTime = time(NULL) + (days * 24 * 3600);  // The arrived time
+    // Calculating the remainder size of the license key;
+    // padding by random hex values
+    unsigned int remainderHexSize = (unsigned int)(LICENSE_LICENSE_KEY_LENGTH - cumulativeLength) / 2;
+    // Preparing the buffer for the padding string, using the dynamic memory allocation
+    unsigned char* randomBuffer = calloc(remainderHexSize, sizeof(unsigned char));
+    // Using "gcry_randomize" for generating the random value
+    gcry_randomize(randomBuffer, remainderHexSize, GCRY_WEAK_RANDOM);
+
+    // To avoid the "\0" character when executing the last randomBuffer, this will lead the '\0' will be put in
+    // the wrong memory location and be exceed the boundary.
+    unsigned char tmpBuffer[3] = {'\0'};
+    for (unsigned int i = 0, j = 0; i < remainderHexSize; i++) {
+        j = sprintf(tmpBuffer, "%02x", randomBuffer[i]);
+        memcpy(licenseKey + cumulativeLength, tmpBuffer, 2);
+        cumulativeLength += j;
+    }
+
+    // Releasing the dynamic memory allocation
+    if (randomBuffer != NULL) {
+        free(randomBuffer);
+        randomBuffer = NULL;
+    }
+
+    // fprintf(stderr, "%.*s\n", LICENSE_LICENSE_KEY_LENGTH, licenseKey);
+
+    // Swapping the ith byte from the first quarter of the data bytes from LICENSE_LICENSE_KEY, where i % 4 = 0;
+    // the swapped byte is started from the (LICENSE_LICENSE_KEY/2)th byte
+    for (unsigned int i = 0; i < LICENSE_LICENSE_KEY_LENGTH / 4; i++) {
+        // Exchanging the values
+        if (i % 4 == 0) {
+            licenseKey[i] = licenseKey[i] ^ licenseKey[(LICENSE_LICENSE_KEY_LENGTH / 2) + i];
+            licenseKey[(LICENSE_LICENSE_KEY_LENGTH / 2) + i] = licenseKey[i] ^ licenseKey[(LICENSE_LICENSE_KEY_LENGTH / 2) + i];
+            licenseKey[i] = licenseKey[i] ^ licenseKey[(LICENSE_LICENSE_KEY_LENGTH / 2) + i];
+        }
+    }
+
+    // fprintf(stderr, "%.*s\n", LICENSE_LICENSE_KEY_LENGTH, licenseKey);
+
+    // License key file generation
+    fileDescriptor = fopen(licenseKeyPath, "rb");
+    if (fileDescriptor) {  // When the license key file exists, ...
+        fclose(fileDescriptor);
+        fileDescriptor = NULL;
+    } else {  // When the license key file does not exist, ...
+        fileDescriptor = fopen(licenseKeyPath, "wb");
+        fwrite(licenseKey, sizeof(unsigned char), LICENSE_LICENSE_KEY_LENGTH, fileDescriptor);
+    }
+
+    if (fileDescriptor != NULL) {
+        fclose(fileDescriptor);
+        fileDescriptor = NULL;
+    }
+
     return isSuccess;
 }
 

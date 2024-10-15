@@ -4,6 +4,8 @@
  *
  * @author Nick, Liao
  * @date 2024/09/27
+ * 
+ * @remark The dependencies are "Commons.Time".
  */
 
 #include <stdio.h>
@@ -20,6 +22,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+// The dependencies files in the project
+#include "../../Commons/Headers/Time.h"
 
 // The two included files are compiled from the official project and made from the
 // the vendors, please refer to the .json file, namely, globalDependencies.json.
@@ -51,7 +56,7 @@ struct License {
     char (*generateAES256Key)(License*, const unsigned char*, const unsigned char*);
 
     // Function pointer, referring to the function, namely generateLicenseKey
-    char (*generateLicenseKey)(License*, const unsigned char*, const unsigned char*);
+    char (*generateLicenseKey)(License*, const unsigned char*, const unsigned char*, const unsigned char*);
 
     // Function pointer, referring to the function, namely generateLicenseIntermediateKey
     void (*generateLicenseIntermediateKey)(License*, unsigned char*, const unsigned char*, unsigned int);
