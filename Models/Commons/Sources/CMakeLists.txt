@@ -1,7 +1,7 @@
 add_library(Models.Commons
-	StringImplement.cpp
-	HashTable.cpp
-	Time.cpp
+	Time.c
 )
 
-target_include_directories(Models.Commons PUBLIC ../Headers)
+target_include_directories(Models.Licenses PUBLIC 
+		../Headers 
+	)

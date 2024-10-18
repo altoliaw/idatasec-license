@@ -1,9 +1,9 @@
 #pragma once
-/** @file TimePrototype.hpp
- * The timestamp prototype for later polymorphisms
+/** @file Time.h
+ * The timestamp class
  *
- * @author William, Chiu; Nick modified
- * @date 2024/06/06
+ * @author Nick, Liao
+ * @date 2024/10/09
  *
  * @note The time zone information, generated from ChatGPT <br />
  * | Time Zone Name | Abbreviation | TZ String | Description |
@@ -25,50 +25,50 @@
  * | Eastern European Time | EET | EET-2EEST | Eastern European Time |
  * | Newfoundland Standard Time | NST | NST3:30NDT | Newfoundland Standard Time |
  */
+#ifndef __USE_XOPEN  // For strptime(.) in time.h
+#define __USE_XOPEN
+#endif
 
+#ifndef _GNU_SOURCE  // For strptime(.) in time.h
+#define _GNU_SOURCE
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include <iostream>
-#include <memory>
-#include <string>
+typedef struct Time Time;
+typedef enum TimeZone Timezone;
 
-#include "./POSIXErrors.hpp"
-
-#ifdef _WIN32
-
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-
-#endif
-
-namespace Commons {
 /**
- * The time class
+ * Time zone definition
  */
-class Time {
-   public:
-    /**
-     * Time zone definition
-     */
-    enum TimeZone {
-        UTC = 0,  // Coordinated Universal Time
-        GMT,      // Greenwich Mean Time
-        PST,      // North American Pacific Standard Time
-        NST,      // Newfoundland Standard Time
-    };
-
-    // Providing a pointer for referring the static value in this class; a static pointer declaration
-    static long* timeEpochPointer;
-
-    static void getTimeInitialization();
-    static long getEpoch(time_t = time(NULL));
-    static long getStringToEpoch(const char*);
-    static std::string getEpochToString(const char*, Time::TimeZone, long = *(Time::timeEpochPointer));
-    static Commons::POSIXErrors windowStrptime(const char*, const char*, tm&);
-
-   private:
-    Time();
+enum TimeZone{
+    LOCAL = -1, // The local time
+    UTC = 0,    // Coordinated Universal Time
+    GMT,        // Greenwich Mean Time
+    PST,        // North American Pacific Standard Time
+    NST         // Newfoundland Standard Time
 };
-}  // namespace Commons
+
+struct Time {
+    // Providing a pointer for referring the static value in this class; a static pointer declaration
+    long* timeEpochPointer;
+
+    // Obtaining the epoch with the current time (using 0 as an argument) or the specified time epoch;
+    // please refer to the "getEpoch" function (@see getEpoch)
+    long (*getEpoch)(Time*, time_t);
+    // Obtaining the specified epoch time; please refer to the function, getStringToEpoch
+    // (@see getStringToEpoch)
+    long (*getStringToEpoch)(Time*, const char*);
+    // For releasing the static variable from the methods in the class (@see releaseInitializedFileParserInitialization)
+    void (*releaseInitializedFileParserInitialization)(Time*);
+    // For transforming the linux utc to the string with users' specified format (@see getEpochToString)
+    void (*getEpochToString)(Time*, const char*, Timezone, long, unsigned char**);
+};
+
+// Time constructor
+void Time_Constrcut(Time*);
+// Time destructor
+void Time_Destrcut(Time*);

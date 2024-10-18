@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 3.14)
 project(idatasec-license)
 
+#setting standard liberary, C
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+
 # [C++ Settings]
 ## GoogleTest requires at least C++14
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # [Testing Flag]
 ## Setting the option to determine whether the test is enabled or the compile (for windows) shall be executed
@@ -18,17 +23,17 @@ if (BUILD_TEST)
 endif()
 
 # [Goolge Test Settings]
-## Goolge test requires
-if (BUILD_TEST)
-  include(FetchContent)
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/305e5a238b3c8d11266fbafd85520fb6b3184851.zip
-  )
-  # For Windows: Prevent overriding the parent project's compiler/linker settings
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(googletest)
-endif()
+# ## Goolge test requires
+# if (BUILD_TEST)
+#   include(FetchContent)
+#   FetchContent_Declare(
+#     googletest
+#     URL https://github.com/google/googletest/archive/305e5a238b3c8d11266fbafd85520fb6b3184851.zip
+#   )
+#   # For Windows: Prevent overriding the parent project's compiler/linker settings
+#   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+#   FetchContent_MakeAvailable(googletest)
+# endif()
 
 # [Involved Files When Compiling]
 ## Copying the dependent files of the project (cfg, ini files or files users feel like opening)
@@ -47,11 +52,11 @@ file(COPY ${CMAKE_SOURCE_DIR}/Outputs DESTINATION ${CMAKE_BINARY_DIR})
 # [Included Directories]
 ## Opening the subdirectory for the next works
 add_subdirectory(Models)
-add_subdirectory(Sources)
+# add_subdirectory(Sources)
 
 ## When the testing function is set as "ON"
 if (BUILD_TEST)
   add_subdirectory(Tests)
-else() # The necessary directory when compiling on Windows
-  add_subdirectory(Apps)
+# else() # The necessary directory when compiling on Windows
+#   add_subdirectory(Apps)
 endif()

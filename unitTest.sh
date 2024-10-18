@@ -1,9 +1,12 @@
 #!/bin/bash
+# "-c" implies that the vendor shall be verified.
 # Dependency porcess
 # Traversal of globalDependencies.json
-Vendors="Vendors"
-source $(pwd)/Shells/installVendor.sh && \
-dependenciesTraversal $(pwd)/Settings/.Json/globalDependencies.json $(pwd)/$Vendors/.$Vendors.json
+if [[ "$1" == "-c" ]]; then
+	Vendors="Vendors"
+	source $(pwd)/Shells/installVendor.sh && \
+	dependenciesTraversal $(pwd)/Settings/.Json/globalDependencies.json $(pwd)/$Vendors/.$Vendors.json
+fi
 
 # Cmake process
 rm -rf build

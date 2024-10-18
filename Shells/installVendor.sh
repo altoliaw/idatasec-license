@@ -88,7 +88,8 @@ function obtainArrayLength() {
 #  * Public Caller, traversal dependencies from the input json file; in each dependency, the shell script will
 #  * execute the command and register information in the file, .Vendors.json in the folder, Vendors;
 #  * to execute the function, please call the function from the root of the project (i.e., that implies
-#  * the current working directory is the root of the project)
+#  * the current working directory is the root of the project); please take attention to the two replaced variables,
+#  * namely, {{name}} and {{projectVendors}}
 #  *
 #  * @param $0 The function called by users
 #  * @param $1 The dependent file name of the .json file (defined in the "Setting/.Json" folder)
@@ -122,6 +123,7 @@ function dependenciesTraversal() {
         local command=$(searchElement "$dependencies" ".[$i].command" "")
         local includes=$(searchElement "$dependencies" ".[$i].includes" "-c")
         local libs=$(searchElement "$dependencies" ".[$i].libs" "-c")
+        local others=$(searchElement "$dependencies" ".[$i].others" "-c")
         local reference=$(searchElement "$dependencies" ".[$i].reference" "")
         local remove=$(searchElement "$dependencies" ".[$i].remove" "")
         local windows=$(searchElement "$dependencies" ".[$i].windows" "")
@@ -154,11 +156,16 @@ function dependenciesTraversal() {
             command=$(echo "$command" | sed 's/"//g')
             remove=$(echo "$remove" | sed 's/"//g')
 
-            # Verifying if downloading, commanding & removing location shall be replaced to the $name.tmp (because the folder 
+            # Verifying if downloading, commanding & removing location shall be replaced to the $name.tmp (because the folder
             # $name is for the formal components where is used for the project)
-            download=$(echo "$download" | sed "s/{{name}}/$folderName.tmp/")
-            command=$(echo "$command" | sed "s/{{name}}/$folderName.tmp/")
-            remove=$(echo "$remove" | sed "s/{{name}}/$folderName.tmp/")
+            download=$(echo "$download" | sed "s/{{name}}/$folderName.tmp/g")
+            command=$(echo "$command" | sed "s/{{name}}/$folderName.tmp/g")
+            remove=$(echo "$remove" | sed "s/{{name}}/$folderName.tmp/g")
+
+            # Verifying if commanded string contains {{projectVendor}}, the {{projectVendor}} shall be replaced
+            # to the path of the project's Vendors folder
+            command=$(echo "$command" | sed "s|{{projectVendors}}|$(pwd)/Vendors|g")
+
 
             # Executing the download, command, installation and removing the download at last
             local vendorDir=$(dirname "$vendorJsonFile") # Displaying the path of the the folder, "Vendors"
@@ -191,6 +198,18 @@ function dependenciesTraversal() {
                 # Removing the quotes
                 activity=$(echo "$activity" | sed 's/"//g')
                 $(echo "cp -pr $activity $vendorDir/$folderName/Libs")
+            done
+
+            # Copying folders from the directory, {{name}}.tmp to the directory, {{name}} because some third party 
+            # software is necessary as well; therefore, those directories and files shall be copied to the 
+            # destination directory, {{name}}
+            local othersLength=$(obtainArrayLength "$others")
+            for ((j = 0; j < $othersLength; j++)); do
+                local activity=$(searchElement "$others" ".[$j]" "-c")
+                # Copying all elements into the "Includes" folder
+                # Removing the quotes
+                activity=$(echo "$activity" | sed 's/"//g')
+                $(echo "cp -pr $activity $vendorDir/$folderName/")
             done
 
             # Removing the .tmp folder
