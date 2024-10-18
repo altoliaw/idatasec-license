@@ -43,20 +43,35 @@ void Test_License_generateAES256KeyProcess(void** State) {
 }
 
 /**
- * generateLicenseKeyProcess test
+ * generateLicenseProcess test
  */
-void Test_License_generateLicenseKeyProcess(void** State) {
+void Test_License_generateLicenseProcess(void** State) {
 
 	License instance;
 	License_Constrcut(&instance);
-	const unsigned char* aesPath = "../../../../Outputs/aes256Key.aes";
+	const unsigned char* interfaceName = "ens192";
+	const unsigned char* aes256KeyPath = "../../../../Outputs/aes256Key.aes";
 	const unsigned char* licensePath = "../../../../Outputs/license.key";
 	const unsigned char* deadline = "2025-11-12 00:00:00";
-	instance.generateLicenseKey(&instance, deadline, aesPath, licensePath);
+	instance.generateLicense(&instance, interfaceName, deadline, licensePath, aes256KeyPath);
 	
 	License_Destrcut(&instance);
 }
 
+
+/**
+ * validateLicenseProcess test
+ */
+void Test_License_validateLicenseProcess(void** State) {
+License instance;
+	License_Constrcut(&instance);
+	const unsigned char* interfaceName = "ens192";
+	const unsigned char* aes256KeyPath = "../../../../Outputs/aes256Key.aes";
+	const unsigned char* licensePath = "../../../../Outputs/license.key";
+	instance.validateLicense(&instance, interfaceName, licensePath, aes256KeyPath);
+	
+	License_Destrcut(&instance);
+}
 
 /**
  * Obtaining the MAC address
