@@ -14,7 +14,7 @@ static void getEpochToString(Time*, const char*, Timezone, long, unsigned char**
  * 
  * @param instance [Time*] The instance
  */
- void Time_Constrcut(Time* instance) {
+ void Time_Construct(Time* instance) {
     instance->timeEpochPointer = NULL;
 
     // Function pointers's definitions
@@ -29,7 +29,7 @@ static void getEpochToString(Time*, const char*, Timezone, long, unsigned char**
  * 
  * @param instance [Time*] The instance
  */
- void Time_Destrcut(Time* instance) {
+ void Time_Destruct(Time* instance) {
     instance->timeEpochPointer = NULL;
 
     // Function pointers's definitions

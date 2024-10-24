@@ -2,8 +2,6 @@
 /** @file Time.h
  * The timestamp class
  *
- * @author Nick, Liao
- * @date 2024/10/09
  *
  * @note The time zone information, generated from ChatGPT <br />
  * | Time Zone Name | Abbreviation | TZ String | Description |
@@ -69,6 +67,6 @@ struct Time {
 };
 
 // Time constructor
-void Time_Constrcut(Time*);
+void Time_Construct(Time*);
 // Time destructor
-void Time_Destrcut(Time*);
+void Time_Destruct(Time*);
