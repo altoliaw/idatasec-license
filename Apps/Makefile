@@ -2,10 +2,8 @@
 #
 # @author Nick
 # @date 2024/09/24
-
-# ######## [Environment Setting]
-# Necessary MakeFile Variables Included
-include ${TempMakefile}
+# ######## [Necessary Common MakeFile Variables Included]
+include ${CommonTempMakefile}
 
 # If someone feel like using the definitions that users define, please remove the comment and fill in the suitable terms.
 # CC			=
@@ -17,6 +15,10 @@ include ${TempMakefile}
 # CFLAGS		=
 # LDFLAGS		=
 # LDLIBS		=
+
+# ######## [Environment Setting]
+# Necessary MakeFile Variables Included
+include ${TempMakefile}
 
 
 # ######## [Variable Definition]
@@ -43,7 +45,7 @@ IsExisted	:=
 .Phony: all
 all: \
 	startTime \
-	${Apps}/SizingMain.o \
+	${Apps}/LicenseGenerationMain.o \
 	endTime
 
 # Adding the Makefile's variables shall be added into the ${TempMakefile} file
@@ -73,5 +75,5 @@ endTime:
 	@echo $(shell source ${projectDir}/Shells/compiledStringMessage.sh && echo $$(endingString "${Models}" "${Duration}"))
 
 # SizingMain
-${Apps}/SizingMain.o:	${Apps}/SizingMain.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Apps}/SizingMain.cpp -c ${FMSG} -o ${Apps}/SizingMain.o
+${Apps}/LicenseGenerationMain.o:	${Apps}/LicenseGenerationMain.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Apps}/LicenseGenerationMain.c -c ${FMSG} -o ${Apps}/LicenseGenerationMain.o

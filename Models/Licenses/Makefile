@@ -1,11 +1,10 @@
-# The Makefile for Commons
+# The Makefile for Licenses
 #
 # @author Nick
 # @date 2024/09/24
 
-# ######## [Environment Setting]
-# Necessary MakeFile Variables Included
-include ${TempMakefile}
+# ######## [Necessary Common MakeFile Variables Included]
+include ${CommonTempMakefile}
 
 # If someone feel like using the definitions that users define, please remove the comment and fill in the suitable terms.
 # CC			=
@@ -18,12 +17,15 @@ include ${TempMakefile}
 # LDFLAGS		=
 # LDLIBS		=
 
+# ######## [Environment Setting]
+# Necessary MakeFile Variables Included
+include ${TempMakefile}
 
 # ######## [Variable Definition]
-Models			:=	Models.Commons
+Models			:=	Models.Licenses
 Duration		:=
-Commons.Headers	:=	${projectDir}/Models/Commons/Headers
-Commons.Sources	:=	${projectDir}/Models/Commons/Sources
+Licenses.Headers	:=	${projectDir}/Models/Licenses/Headers
+Licenses.Sources	:=	${projectDir}/Models/Licenses/Sources
 
 # ######## [Passing the Variable Definition into the File]
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project);
@@ -43,10 +45,7 @@ IsExisted	:=
 .Phony: all
 all: \
 	startTime \
-	${Commons.Sources}/HashTable.o \
-	${Commons.Sources}/IOSpecification.o \
-	${Commons.Sources}/StringImplement.o \
-	${Commons.Sources}/Time.o \
+	${Licenses.Sources}/License.o \
 	endTime
 # Adding the Makefile's variables shall be added into the ${TempMakefile} file
 	@make information
@@ -59,10 +58,10 @@ information:
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project) to
 # determine if the variable in the Makefile shall be added into the ${TempMakefile}
 # Using the "eval" to assign the Makefile's variable in the recipe
-	@$(eval IsExisted	:=	$(shell grep -q "^Commons\.Sources\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
+	@$(eval IsExisted	:=	$(shell grep -q "^Licenses\.Sources\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
 # Adding the variable into the file when the variables do not in the file, the information shall put into the file
 	@if [ "${IsExisted}" != "0" ]; then \
-		echo "Commons.Sources	:=	${projectDir}/Models/Commons/Sources" >> "${TempMakefile}"; \
+		echo "Licenses.Sources	:=	${projectDir}/Models/Licenses/Sources" >> "${TempMakefile}"; \
 	fi
 
 # ######## [Compiling Items]
@@ -73,18 +72,6 @@ startTime:
 endTime:
 	@echo $(shell source ${projectDir}/Shells/compiledStringMessage.sh && echo $$(endingString "${Models}" "${Duration}"))
 
-# Commons.HashTable
-${Commons.Sources}/HashTable.o:	${Commons.Sources}/HashTable.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/HashTable.cpp -c ${FMSG} -o ${Commons.Sources}/HashTable.o
-
-# Commons.IOSpecification
-${Commons.Sources}/IOSpecification.o:	 ${Commons.Sources}/IOSpecification.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/IOSpecification.cpp -c ${FMSG} -o ${Commons.Sources}/IOSpecification.o
-
-# Commons.StringImplement
-${Commons.Sources}/StringImplement.o:	${Commons.Sources}/StringImplement.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/StringImplement.cpp -c ${FMSG} -o ${Commons.Sources}/StringImplement.o
-
-# Commons.Time
-${Commons.Sources}/Time.o:	${Commons.Sources}/Time.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/Time.cpp -c ${FMSG} -o ${Commons.Sources}/Time.o
+# Licenses.License
+${Licenses.Sources}/License.o:	${Licenses.Sources}/License.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Licenses.Sources}/License.c -c ${FMSG} -o ${Licenses.Sources}/License.o

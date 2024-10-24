@@ -3,9 +3,8 @@
 # @author Nick
 # @date 2024/09/24
 
-# ######## [Environment Setting]
-# Necessary MakeFile Variables Included
-include ${TempMakefile}
+# ######## [Necessary Common MakeFile Variables Included]
+include ${CommonTempMakefile}
 
 # If someone feel like using the definitions that users define, please remove the comment and fill in the suitable terms.
 # CC			=
@@ -18,6 +17,9 @@ include ${TempMakefile}
 # LDFLAGS		=
 # LDLIBS		=
 
+# ######## [Environment Setting]
+# Necessary MakeFile Variables Included
+include ${TempMakefile}
 
 # ######## [Variable Definition]
 Models			:=	Models.Commons
@@ -43,10 +45,9 @@ IsExisted	:=
 .Phony: all
 all: \
 	startTime \
-	${Commons.Sources}/HashTable.o \
-	${Commons.Sources}/IOSpecification.o \
-	${Commons.Sources}/StringImplement.o \
 	${Commons.Sources}/Time.o \
+	${Commons.Sources}/EncodePrototype.o \
+	${Commons.Sources}/EncodeBase64.o \
 	endTime
 # Adding the Makefile's variables shall be added into the ${TempMakefile} file
 	@make information
@@ -73,18 +74,14 @@ startTime:
 endTime:
 	@echo $(shell source ${projectDir}/Shells/compiledStringMessage.sh && echo $$(endingString "${Models}" "${Duration}"))
 
-# Commons.HashTable
-${Commons.Sources}/HashTable.o:	${Commons.Sources}/HashTable.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/HashTable.cpp -c ${FMSG} -o ${Commons.Sources}/HashTable.o
-
-# Commons.IOSpecification
-${Commons.Sources}/IOSpecification.o:	 ${Commons.Sources}/IOSpecification.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/IOSpecification.cpp -c ${FMSG} -o ${Commons.Sources}/IOSpecification.o
-
-# Commons.StringImplement
-${Commons.Sources}/StringImplement.o:	${Commons.Sources}/StringImplement.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/StringImplement.cpp -c ${FMSG} -o ${Commons.Sources}/StringImplement.o
-
 # Commons.Time
-${Commons.Sources}/Time.o:	${Commons.Sources}/Time.cpp
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/Time.cpp -c ${FMSG} -o ${Commons.Sources}/Time.o
+${Commons.Sources}/Time.o:	${Commons.Sources}/Time.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/Time.c -c ${FMSG} -o ${Commons.Sources}/Time.o
+
+# Commons.EncodePrototype
+${Commons.Sources}/EncodePrototype.o:	 ${Commons.Sources}/EncodePrototype.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/EncodePrototype.c -c ${FMSG} -o ${Commons.Sources}/EncodePrototype.o
+
+# Commons.EncodeBase64
+${Commons.Sources}/EncodeBase64.o:	${Commons.Sources}/EncodeBase64.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/EncodeBase64.c -c ${FMSG} -o ${Commons.Sources}/EncodeBase64.o

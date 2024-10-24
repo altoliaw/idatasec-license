@@ -10,7 +10,7 @@
  */
 void EncodePrototype_Construct(EncodePrototype* instance, const unsigned char* className) {
 	(instance->className)[0] = '\0';
-	strcpy(instance->className, className);
+	strcpy((char*)(instance->className), (const char*)className);
 	instance->encodeString= NULL;
 	instance->decodeString= NULL;
 }

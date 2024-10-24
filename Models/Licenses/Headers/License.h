@@ -42,6 +42,9 @@
 #define LICENSE_CONTENT_MESSAGE_WITH_SIGNATURE LICENSE_CONTENT_MESSAGE \
             LICENSE_CONTENT_MESSAGE_VARIABLE3 "%lu\n"
 
+#define TERMINAL_OUTPUT_COLOR_RED "\033[0;31m"
+#define TERMINAL_OUTPUT_COLOR_RESET "\033[0m"
+
 /**
  * For common values's definition in the "License" class
  */

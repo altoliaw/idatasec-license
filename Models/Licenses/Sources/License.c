@@ -791,8 +791,13 @@ static char generateAsymmetricKeyValuePair(License* instance, const unsigned cha
     // Layout the keys
     FILE* fileDescriptor = fopen((char*)extension, "rb");
     if (fileDescriptor != NULL) {
-        fprintf(stderr, "RSA key exists.\n");
-        isSuccess = 0x1;
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED 
+                        "RSA key exists, the key pair will not be regenerated; "
+                        "if supervisors feel like regenerating the key pairs, "
+                        "please reassign the location of the baseNameLicenseKeyPairPath\n"
+                        TERMINAL_OUTPUT_COLOR_RESET
+        );
+        isSuccess = 0x0;
         fclose(fileDescriptor);
     } else {
         unsigned char contents[LICENSE_LICENSE_CONTENTS_LENGTH] = {'\0'};

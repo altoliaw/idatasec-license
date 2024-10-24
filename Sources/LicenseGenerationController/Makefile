@@ -1,11 +1,10 @@
-# The Makefile for SizingController
+# The Makefile for LicenseGenerationController
 #
 # @author Nick
 # @date 2024/09/24
 
-# ######## [Environment Setting]
-# Necessary MakeFile Variables Included
-include ${TempMakefile}
+# ######## [Necessary Common MakeFile Variables Included]
+include ${CommonTempMakefile}
 
 # If someone feel like using the definitions that users define, please remove the comment and fill in the suitable terms.
 # CC			=
@@ -18,12 +17,15 @@ include ${TempMakefile}
 # LDFLAGS		=
 # LDLIBS		=
 
+# ######## [Environment Setting]
+# Necessary MakeFile Variables Included
+include ${TempMakefile}
 
 # ######## [Variable Definition]
-Models			:=	Sources.SizingController
+Models			:=	Sources.LicenseGenerationController
 Duration		:=
 Sources			:=	${projectDir}/Sources
-Sources.SizingController	:=	${Sources}/SizingController
+Sources.LicenseGenerationController	:=	${Sources}/LicenseGenerationController
 
 
 # ######## [Passing the Variable Definition into the File]
@@ -44,10 +46,7 @@ IsExisted	:=
 .Phony: all
 all: \
 	startTime \
-	${Sources.SizingController}/SizingMainCallerPrototype.o \
-	${Sources.SizingController}/SizingMainCaller.o \
-	${Sources.SizingController}/LinuxSizingMainCaller.o \
-	${Sources.SizingController}/WindowsSizingMainCaller.o \
+	${Sources.LicenseGenerationController}/LicenseMainCaller.o \
 	endTime
 # Adding the Makefile's variables shall be added into the ${TempMakefile} file
 	@make information
@@ -60,10 +59,10 @@ information:
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project) to
 # determine if the variable in the Makefile shall be added into the ${TempMakefile}
 # Using the "eval" to assign the Makefile's variable in the recipe
-	@$(eval IsExisted	:=	$(shell grep -q "^Sources\.SizingController\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
+	@$(eval IsExisted	:=	$(shell grep -q "^Sources\.LicenseGenerationController\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
 # Adding the variable into the file when the variables do not in the file, the information shall put into the file
 	@if [ "${IsExisted}" != "0" ]; then \
-		echo "Sources.SizingController	:=	${Sources}/SizingController" >> "${TempMakefile}"; \
+		echo "Sources.LicenseGenerationController	:=	${Sources}/LicenseGenerationController" >> "${TempMakefile}"; \
 	fi
 
 # ######## [Compiling Items]
@@ -74,6 +73,6 @@ startTime:
 endTime:
 	@echo $(shell source ${projectDir}/Shells/compiledStringMessage.sh && echo $$(endingString "${Models}" "${Duration}"))
 
-# SizingMainCaller
-# ${Sources.SizingController}/SizingMainCaller.o:	${Sources.SizingController}/SizingMainCaller.cpp
-# 	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Sources.SizingController}/SizingMainCaller.cpp -c ${FMSG} -o ${Sources.SizingController}/SizingMainCaller.o
+# LicenseMainCaller
+${Sources.LicenseGenerationController}/LicenseMainCaller.o:	${Sources.LicenseGenerationController}/LicenseMainCaller.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Sources.LicenseGenerationController}/LicenseMainCaller.c -c ${FMSG} -o ${Sources.LicenseGenerationController}/LicenseMainCaller.o
