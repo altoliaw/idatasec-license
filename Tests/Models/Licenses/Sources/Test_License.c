@@ -19,7 +19,7 @@ void Test_License_generateAES256KeyProcess(void** State) {
     enum { macAddressLength = 6 };
 
 	License instance;
-	License_Constrcut(&instance);
+	License_Construct(&instance);
 	const unsigned char* interfaceName = "ens192";
 	const unsigned char* path = "../../../../Outputs/aes256Key.aes";
 	instance.generateAES256Key(&instance, interfaceName, path);
@@ -35,42 +35,72 @@ void Test_License_generateAES256KeyProcess(void** State) {
 	}
 
 	// Comparing with the characters
-	for (unsigned int i= 0; i< macAddressLength; i++ ) { 
+	for (unsigned int i= 0; i< macAddressLength; i++ ) {
 		assert_int_equal(macAddressInHex[i], instance.macAddress[i]);
 	}
-	 
-	License_Destrcut(&instance);
+
+	License_Destruct(&instance);
+}
+
+/**
+ * generateClientInformationProcess test
+ */
+void Test_License_generateClientInformationProcess(void** State) {
+
+	License instance;
+	License_Construct(&instance);
+	const unsigned char* interfaceName = "ens192";
+	const unsigned char* aes256KeyPath = "../../../../Outputs/aes256Key.aes";
+	const unsigned char* informationPath = "../../../../Outputs/content.info";
+	instance.generateClientInformation(&instance, interfaceName, informationPath, aes256KeyPath);
+
+	License_Destruct(&instance);
+}
+
+
+
+/**
+ * generateAsymmetricKeyValuePairProcess test
+ */
+void Test_License_generateAsymmetricKeyValuePairProcess(void** State) {
+	License instance;
+	License_Construct(&instance);
+	const unsigned char* path = "../../../../Outputs/license.key";
+	instance.generateAsymmetricKeyValuePair(&instance, path);
+
+	License_Destruct(&instance);
 }
 
 /**
  * generateLicenseProcess test
  */
 void Test_License_generateLicenseProcess(void** State) {
-
 	License instance;
-	License_Constrcut(&instance);
+	License_Construct(&instance);
 	const unsigned char* interfaceName = "ens192";
 	const unsigned char* aes256KeyPath = "../../../../Outputs/aes256Key.aes";
-	const unsigned char* licensePath = "../../../../Outputs/license.key";
-	const unsigned char* deadline = "2025-11-12 00:00:00";
-	instance.generateLicense(&instance, interfaceName, deadline, licensePath, aes256KeyPath);
-	
-	License_Destrcut(&instance);
-}
+	const unsigned char* informationPath = "../../../../Outputs/content.info";
+	const unsigned char* licensePrivateKeyPath = "../../../../Outputs/license.key.pem";
+	const unsigned char* licensePath = "../../../../Outputs/license.lic";
+	instance.generateLicense(&instance, interfaceName, informationPath, aes256KeyPath, licensePrivateKeyPath, licensePath, 365);
 
+	License_Destruct(&instance);
+}
 
 /**
  * validateLicenseProcess test
  */
 void Test_License_validateLicenseProcess(void** State) {
-License instance;
-	License_Constrcut(&instance);
+	License instance;
+	License_Construct(&instance);
 	const unsigned char* interfaceName = "ens192";
 	const unsigned char* aes256KeyPath = "../../../../Outputs/aes256Key.aes";
-	const unsigned char* licensePath = "../../../../Outputs/license.key";
-	instance.validateLicense(&instance, interfaceName, licensePath, aes256KeyPath);
+	const unsigned char* licensePublicKeyPath = "../../../../Outputs/license.key.pub";
+	const unsigned char* informationPath = "../../../../Outputs/license.lic";
+	instance.validateLicense(&instance, interfaceName, licensePublicKeyPath, informationPath, aes256KeyPath);
+
 	
-	License_Destrcut(&instance);
+	License_Destruct(&instance);
 }
 
 /**

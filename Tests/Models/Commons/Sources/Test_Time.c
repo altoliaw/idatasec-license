@@ -14,7 +14,7 @@ int main() {
  */
 void Test_Time_getEpochProcess(void** State) {
     Time instance;
-    Time_Constrcut(&instance);
+    Time_Construct(&instance);
     time_t now = time(NULL);
     long resultTime = instance.getEpoch(&instance, 0);
 
@@ -23,7 +23,7 @@ void Test_Time_getEpochProcess(void** State) {
     assert_int_equal((long)now, resultTime);
     // Releasing the static variable
     instance.releaseInitializedFileParserInitialization(&instance);
-    Time_Destrcut(&instance);
+    Time_Destruct(&instance);
 }
 
 /**
@@ -31,7 +31,7 @@ void Test_Time_getEpochProcess(void** State) {
  */
 void Test_Time_getStringToEpoch(void** State) {
     Time instance;
-    Time_Constrcut(&instance);
+    Time_Construct(&instance);
     long utc = 1760025600;
 
     long resultTime = instance.getStringToEpoch(&instance, "2025-10-10 00:00:00");
@@ -43,7 +43,7 @@ void Test_Time_getStringToEpoch(void** State) {
 
     // Releasing the static variable
     instance.releaseInitializedFileParserInitialization(&instance);
-    Time_Destrcut(&instance);
+    Time_Destruct(&instance);
 }
 
 /**
@@ -51,7 +51,7 @@ void Test_Time_getStringToEpoch(void** State) {
  */
 void Test_Time_getEpochToString(void** State) {
     Time instance;
-    Time_Constrcut(&instance);
+    Time_Construct(&instance);
     long utc = 1760025600;
 	const unsigned char* timeString = "2025-10-10 00:00:00";
 	const unsigned char* timeUTCString = "2025-10-09 16:00:00";
@@ -76,5 +76,5 @@ void Test_Time_getEpochToString(void** State) {
 
     // Releasing the static variable
     instance.releaseInitializedFileParserInitialization(&instance);
-    Time_Destrcut(&instance);
+    Time_Destruct(&instance);
 }

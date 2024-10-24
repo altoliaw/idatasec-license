@@ -2,9 +2,6 @@
 /** @file License.h
  * The license class definition using AES CBC + PKCS#7
  *
- * @author Nick, Liao
- * @date 2024/09/27
- * 
  * @remark The dependencies are "Commons.Time".
  */
 
@@ -22,21 +19,28 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <regex.h>
 
 // The dependencies files in the project
 #include "../../Commons/Headers/Time.h"
+#include "../../Commons/Headers/EncodeBase64.h"
 
 // The two included files are compiled from the official project and made from the
 // the vendors, please refer to the .json file, namely, globalDependencies.json.
 #include "../../../Vendors/libGcrypt/Includes/gcrypt.h"         // The gcrypt (gcrypt.h) from the third parties
 
-#define LICENSE_CONTENT_MESSAGE_VARIABLE1 "Authorized Entity:"
-#define LICENSE_CONTENT_MESSAGE_VARIABLE2 "Authorized Deadline:"
-#define LICENSE_CONTENT_MESSAGE_VARIABLE3 "Authorized Time:"
-#define LICENSE_CONTENT_MESSAGE LICENSE_CONTENT_MESSAGE_VARIABLE1 "%.*s\n" \
-            LICENSE_CONTENT_MESSAGE_VARIABLE2 "%lu\n" \
-            LICENSE_CONTENT_MESSAGE_VARIABLE3 "%lu\n"
+// The definition of the contents of license
 
+//The first, second and third key value pairs
+#define LICENSE_CONTENT_MESSAGE_VARIABLE1 "Authorized Entity:"
+#define LICENSE_CONTENT_MESSAGE_VARIABLE2 "Authorized Time:"
+#define LICENSE_CONTENT_MESSAGE_VARIABLE3 "DeadLine:"
+// The information content from the client
+#define LICENSE_CONTENT_MESSAGE LICENSE_CONTENT_MESSAGE_VARIABLE1 "%.*s\n" \
+            LICENSE_CONTENT_MESSAGE_VARIABLE2 "%lu\n"
+//The final information for the license
+#define LICENSE_CONTENT_MESSAGE_WITH_SIGNATURE LICENSE_CONTENT_MESSAGE \
+            LICENSE_CONTENT_MESSAGE_VARIABLE3 "%lu\n"
 
 /**
  * For common values's definition in the "License" class
@@ -45,7 +49,6 @@ enum LicenseConstants {
     LICENSE_MAC_ADDRESS = 12,        // The number of the MAC address
     LICENSE_BLOCK_SIZE = 16,         // AES block size and IV size
     LICENSE_AES_KEY_SIZE = 32,       // 32 bytes for AES-256
-    LICENSE_LICENSE_KEY_LENGTH = 64, // License key length
     LICENSE_LICENSE_CONTENTS_LENGTH = 1024 // License contents length
 };
 
@@ -56,7 +59,7 @@ typedef struct License License;
  */
 struct License {
     // For reserving the license layout value with the specified field order; the field order is defined
-    // in the variable, "globalLicenseFields", in the License.c; the pointer shall be allocated/deallocated 
+    // in the variable, "globalLicenseFields", in the License.c; the pointer shall be allocated/deallocated
     // with the dynamic memory allocation/deallocation
     unsigned char** valueForGlobalLicenseFields;
     // The length for the array above
@@ -68,19 +71,24 @@ struct License {
     // Reserving the mac address in the hex format
     unsigned char macAddress[LICENSE_MAC_ADDRESS];
     // The license key
-    unsigned char licenseKey[LICENSE_LICENSE_KEY_LENGTH];
+    unsigned char licenseVerificationCode[LICENSE_LICENSE_CONTENTS_LENGTH];
     // License contents storage
     unsigned char licenseContents[LICENSE_LICENSE_CONTENTS_LENGTH];
 
     // Function pointer, referring to the function, namely generateAES256Key
     char (*generateAES256Key)(License*, const unsigned char*, const unsigned char*);
+    // Function pointer, referring to the function, namely generateClientInformation
+    char (*generateClientInformation)(License*, const unsigned char*, const unsigned char*, const unsigned char*);
+    // Function pointer, referring to the function, namely validateInformation
+    char (*validateLicense)(License*, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*);
+    // Function pointer, referring to the function, namely, generateAsymmetricKeyValuePair
+    char (*generateAsymmetricKeyValuePair)(License*, const unsigned char*);
     // Function pointer, referring to the function, namely generateLicense
-    char (*generateLicense)(License*, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*);
-    // Function pointer, referring to the function, namely validateLicense
-    char (*validateLicense)(License*, const unsigned char*, const unsigned char*, const unsigned char*);
+    char (*generateLicense)(License*, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*, unsigned int);
+
 };
 
 // License constructor
-void License_Constrcut(License*);
+void License_Construct(License*);
 // License destructor
-void License_Destrcut(License*);
+void License_Destruct(License*);
