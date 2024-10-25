@@ -7,6 +7,7 @@ Here are the necessary tools for developing and compiling the project on RHEL8.7
 
 g++ (g++ (GCC) 8.5.0 20210514 (Red Hat 8.5.0-15)) \
 gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-15) \
+cmocka \
 GNU Make 4.2.1 \
 cmake version 3.20.2 \
 jq-1.6 \

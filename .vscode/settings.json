@@ -105,7 +105,8 @@
     "encodeprototype.h": "c",
     "test_encodebase64.h": "c",
     "encodebase64.h": "c",
-    "licensemaincaller.h": "c"
+    "licensemaincaller.h": "c",
+    "test_licensegenerationcontroller.h": "c"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",

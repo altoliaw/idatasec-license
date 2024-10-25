@@ -48,25 +48,25 @@ char start(int argc, char** argv) {
     unsigned int days = 0;
     argumentAssignment(argc, argv, &aes256KeyPath, &interfaceName, &baseNameLicenseKeyPairPath, &informationPath, &licensePath, &days);
 
-    // Initializing the "License" instance
+    // // Initializing the "License" instance
     License instance;
     License_Construct(&instance);
-    // Generating the AES-256 key for encrypting the plaintext information; if the file exists, the key will be regenerated
-    isSuccess |= (isSuccess == 0x0) ? instance.generateAES256Key(&instance, (const unsigned char*)interfaceName, (const unsigned char*)aes256KeyPath) : 0x1;
+    // // Generating the AES-256 key for encrypting the plaintext information; if the file exists, the key will be regenerated
+    // isSuccess |= (isSuccess == 0x0) ? instance.generateAES256Key(&instance, (const unsigned char*)interfaceName, (const unsigned char*)aes256KeyPath) : 0x1;
 
     // Generating the license key pair; if the file exists, the phase will be ignored
-    instance.generateAsymmetricKeyValuePair(&instance, (const unsigned char*)baseNameLicenseKeyPairPath);
+    isSuccess |= (isSuccess == 0x0) ? instance.generateAsymmetricKeyValuePair(&instance, (const unsigned char*)baseNameLicenseKeyPairPath) : 0x1;
 
     // Generating the license
     unsigned char* licensePrivateKeyPath = NULL;
-	unsigned int pathLength = (unsigned int)strlen((const char*)baseNameLicenseKeyPairPath);
-	unsigned int extensionLength = (unsigned int)strlen((const char*)DEFAULT_LICENSE_KEY_PAIR_PRIVATE_EXTENSION);
-	licensePrivateKeyPath = calloc(pathLength + extensionLength + 1, sizeof(unsigned char));
-	// Generating the license private key path
-	memcpy(licensePrivateKeyPath, baseNameLicenseKeyPairPath, pathLength);
-	memcpy(licensePrivateKeyPath + pathLength, DEFAULT_LICENSE_KEY_PAIR_PRIVATE_EXTENSION, extensionLength);
-	licensePrivateKeyPath[pathLength + extensionLength] = '\0';
-	// Generating the license
+    unsigned int pathLength = (unsigned int)strlen((const char*)baseNameLicenseKeyPairPath);
+    unsigned int extensionLength = (unsigned int)strlen((const char*)DEFAULT_LICENSE_KEY_PAIR_PRIVATE_EXTENSION);
+    licensePrivateKeyPath = calloc(pathLength + extensionLength + 1, sizeof(unsigned char));
+    // Generating the license private key path
+    memcpy(licensePrivateKeyPath, baseNameLicenseKeyPairPath, pathLength);
+    memcpy(licensePrivateKeyPath + pathLength, DEFAULT_LICENSE_KEY_PAIR_PRIVATE_EXTENSION, extensionLength);
+    licensePrivateKeyPath[pathLength + extensionLength] = '\0';
+    // Generating the license
     instance.generateLicense(&instance, interfaceName, informationPath, aes256KeyPath, licensePrivateKeyPath, licensePath, days);
 
     // Destructing the "License" instance
@@ -107,10 +107,10 @@ static void argumentAssignment(int argc, char** argv,
                 *aes256KeyPath = (unsigned char*)argv[i];
                 break;
             case 2:
-                *baseNameLicenseKeyPairPath = (unsigned char*)argv[i];
+                *interfaceName = (unsigned char*)argv[i];
                 break;
             case 3:
-                *interfaceName = (unsigned char*)argv[i];
+                *baseNameLicenseKeyPairPath = (unsigned char*)argv[i];
                 break;
             case 4:
                 *informationPath = (unsigned char*)argv[i];

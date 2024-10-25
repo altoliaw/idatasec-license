@@ -147,6 +147,11 @@ static char generateAES256Key(License* instance, const unsigned char* interfaceN
     // Key file generation
     FILE* fileDescriptor = fopen((const char*)path, "rb");
     if (fileDescriptor) {  // When the key file exists, ...
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED
+                "The AES key file exists. The key will not be regenerated. "
+                "If supervisors feel like regenerating the key, "
+                "please remove the key file." TERMINAL_OUTPUT_COLOR_RESET
+                "\n");
         fclose(fileDescriptor);
         fileDescriptor = NULL;
     } else {  // When the key file does not exist, ...
@@ -454,7 +459,7 @@ static char aes256CbcDecrypt(const unsigned char* ciphertext,
     if (originalCiphertext == NULL) {
         originalCiphertext = calloc(ciphertextLen, sizeof(unsigned char));
     }
-
+    
     // Using sscanf(.) to convert hex values into unsigned char string
     unsigned long cumulativeLength = 0;
     unsigned int tmpBuff = 0;  // For reserving the temporary memory
@@ -630,6 +635,7 @@ static char validateInformation(License* instance,
                      instance->iv,
                      &plaintext,
                      &plaintextLen);
+
     // Parser definition
     const unsigned char* keyValueDelimiter = (const unsigned char*)":";
     const unsigned short keyValueDelimiterLength = (unsigned short)strlen((char*)keyValueDelimiter);
@@ -790,12 +796,11 @@ static char generateAsymmetricKeyValuePair(License* instance, const unsigned cha
     // Layout the keys
     FILE* fileDescriptor = fopen((char*)extension, "rb");
     if (fileDescriptor != NULL) {
-        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED 
-                        "RSA key exists, the key pair will not be regenerated; "
-                        "if supervisors feel like regenerating the key pairs, "
-                        "please reassign the location of the baseNameLicenseKeyPairPath\n"
-                        TERMINAL_OUTPUT_COLOR_RESET
-        );
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED
+                "RSA key exists, the key pair will not be regenerated; "
+                "if supervisors feel like regenerating the key pairs, "
+                "please reassign the location of the baseNameLicenseKeyPairPath" TERMINAL_OUTPUT_COLOR_RESET
+                "\n");
         isSuccess = 0x0;
         fclose(fileDescriptor);
     } else {
@@ -805,7 +810,8 @@ static char generateAsymmetricKeyValuePair(License* instance, const unsigned cha
         fileDescriptor = fopen((char*)extension, "wb");
         // fprintf(fileDescriptor, "-----BEGIN RSA PRIVATE KEY-----\n");
         gcry_sexp_sprint(privateKey, GCRYSEXP_FMT_ADVANCED, contents, privateKeyLength);
-        fwrite(contents, 1, privateKeyLength, fileDescriptor);;
+        fwrite(contents, 1, privateKeyLength, fileDescriptor);
+        ;
         // fprintf(fileDescriptor, "\n-----END RSA PRIVATE KEY-----\n");
         fclose(fileDescriptor);
 
@@ -818,7 +824,6 @@ static char generateAsymmetricKeyValuePair(License* instance, const unsigned cha
         fwrite(contents, 1, publicKeyLength, fileDescriptor);
         // fprintf(fileDescriptor, "\n-----END RSA PUBLIC KEY-----\n");
         fclose(fileDescriptor);
-        
     }
 
     {  // Releasing the memory
@@ -919,6 +924,12 @@ static char generateLicense(License* instance,
     // Generating the license file
     FILE* fileDescriptor = fopen((const char*)licensePath, "rb");
     if (fileDescriptor != NULL) {  // If the license file exists, ...
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED
+                "The license file exists, the license will not be regenerated. "
+                "If supervisors feel like regenerating the license, "
+                "please reassign the location of the licensePath" 
+                TERMINAL_OUTPUT_COLOR_RESET
+                "\n");
         fclose(fileDescriptor);
         fileDescriptor = NULL;
     } else {  // If the license file does not exist, ...
@@ -1080,7 +1091,7 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
     //     fprintf(stderr, "%d: %s\n", i, (instance->valueForGlobalLicenseFields)[i]);
     // }
 
-    // Verifying all information; the phase are as follows: 1) comparing with the verification code, 2) comparing with the MAC address, 
+    // Verifying all information; the phase are as follows: 1) comparing with the verification code, 2) comparing with the MAC address,
     // and 3) comparing with the expiration date
 
     // 1) Comparing with the verification code
@@ -1154,7 +1165,7 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
             sprintf((char*)tmpBuffer, "%02x", macAddress[i]);
             memcpy(macAddress + (i * 2), tmpBuffer, 2);  // Copying the MAC address
         }
-        
+
         // Comparing the MAC address
         for (unsigned int i = 0; i < macAddressLength * 2; i++) {
             if (macAddress[i] != decryptedMacAddress[i]) {
@@ -1171,37 +1182,35 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
         unsigned char* decryptedDeadline = (unsigned char*)((instance->valueForGlobalLicenseFields)[2]);
         unsigned long deadlineTimeEpoch = 0;
         {  // Verifying the number format by using regular expression
-        regex_t regex;
-        const char* pattern = "^[0-9]+$";
-        int result = regcomp(&regex, pattern, REG_EXTENDED);
-        isSuccess |= ((result == 0) ? 0x0 : 0x1);
+            regex_t regex;
+            const char* pattern = "^[0-9]+$";
+            int result = regcomp(&regex, pattern, REG_EXTENDED);
+            isSuccess |= ((result == 0) ? 0x0 : 0x1);
 
-        result = regexec(&regex, (char*)decryptedDeadline, 0, NULL, 0);
-        isSuccess |= ((result == 0) ? 0x0 : 0x1);
+            result = regexec(&regex, (char*)decryptedDeadline, 0, NULL, 0);
+            isSuccess |= ((result == 0) ? 0x0 : 0x1);
 
-        char* errorPointer;
-        // Transforming a character from the source string into a numeric value
-        if (isSuccess != 0x0) {
-            fprintf(stderr, "The expired time format is illegal.\n");
-            isSuccess = 0x1;
-        } else {
-
-            deadlineTimeEpoch = strtol((char*)decryptedDeadline, &errorPointer, 10);
-            Time timeInstance;
-            Time_Construct(&timeInstance);
-            unsigned long currentTimeEpoch = timeInstance.getEpoch(&timeInstance, 0);
-            Time_Destruct(&timeInstance);
-
-            if (currentTimeEpoch > deadlineTimeEpoch) {
-                fprintf(stderr, "The license has been expired. Please contact the supplier. \n");
+            char* errorPointer;
+            // Transforming a character from the source string into a numeric value
+            if (isSuccess != 0x0) {
+                fprintf(stderr, "The expired time format is illegal.\n");
                 isSuccess = 0x1;
+            } else {
+                deadlineTimeEpoch = strtol((char*)decryptedDeadline, &errorPointer, 10);
+                Time timeInstance;
+                Time_Construct(&timeInstance);
+                unsigned long currentTimeEpoch = timeInstance.getEpoch(&timeInstance, 0);
+                Time_Destruct(&timeInstance);
+
+                if (currentTimeEpoch > deadlineTimeEpoch) {
+                    fprintf(stderr, "The license has been expired. Please contact the supplier. \n");
+                    isSuccess = 0x1;
+                }
+            }
+            {  // Releasing memory deallocation manually
+                regfree(&regex);
             }
         }
-        {  // Releasing memory deallocation manually
-            regfree(&regex);
-        }
-    }
-
     }
 
     {  // Releasing memory deallocation manually
