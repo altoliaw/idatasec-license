@@ -1,5 +1,5 @@
-# Traffic Monitor, Sizing
-The issue was raised on May 15th, 2024, edited by Nick.
+# License Generation
+For generating and validating the license, here is a simple project for implementation
 
 
 ## Development Environment
