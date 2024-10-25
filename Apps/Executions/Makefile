@@ -18,10 +18,14 @@ include ${CommonTempMakefile}
 # DETAILINFO	=
 # WALL		=
 # FMSG		=
-# CFLAGS		=
-# LDFLAGS		=
-# LDLIBS		=
+CFLAGS		=
+LDFLAGS		=-LVendors/libGpG-Error/Libs -LVendors/libGcrypt/Libs
+LDLIBS		=-lgpg-error -lgcrypt -lpthread
 
+# Replacing terms by using $(.) from Makefile function
+# CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
+# Replacing terms by using $(.) from Makefile function
+LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
 
 # ######## [Variable Definition]
 Models			:=	Apps.Executions
@@ -57,8 +61,9 @@ endTime:
 # SizingMain.exe
 ${Apps}/SizingMain.exe: 
 	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${FMSG} -o ${projectDir}/${Bin}/LicenseGenerationMain.exe ${Apps}/LicenseGenerationMain.o \
-	${Sources.LicenseGenerationController}/EncodeBase64.o \
+	${Sources.LicenseGenerationController}/LicenseMainCaller.o \
 	${Commons.Sources}/EncodePrototype.o \
+	${Commons.Sources}/EncodeBase64.o \
 	${Commons.Sources}/Time.o \
 	${Licenses.Sources}/License.o \
 	${LDFLAGS} \

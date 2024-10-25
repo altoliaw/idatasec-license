@@ -37,7 +37,7 @@ LDLIBS		:= $(shell source ${projectDir}/Shells/iniParser.sh && echo $$(getVariab
 # Replacing terms by using $(.) from Makefile function
 CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
 # Replacing terms by using $(.) from Makefile function
-LDFLAGS		:=$(subst -L,-L${projectDir}/,${LDFLAGS})
+LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
 
 
 # When the platform is not equal to the Linux

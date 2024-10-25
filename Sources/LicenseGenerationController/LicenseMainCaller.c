@@ -1,7 +1,7 @@
 /**
  * @see LicenseMainCaller.h
  */
-#include "../Headers/LicenseGenerationController/LicenseMainCaller.h"
+#include "../../Headers/LicenseGenerationController/LicenseMainCaller.h"
 static void argumentAssignment(int, char**, unsigned char**, unsigned char**, unsigned char**, unsigned char**, unsigned char**, unsigned int*);
 
 /**
@@ -104,19 +104,19 @@ static void argumentAssignment(int argc, char** argv,
     for (i = 1; i < argc; i++) {
         switch (i) {
             case 1:
-                *aes256KeyPath = argv[i];
+                *aes256KeyPath = (unsigned char*)argv[i];
                 break;
             case 2:
-                *baseNameLicenseKeyPairPath = argv[i];
+                *baseNameLicenseKeyPairPath = (unsigned char*)argv[i];
                 break;
             case 3:
-                *interfaceName = argv[i];
+                *interfaceName = (unsigned char*)argv[i];
                 break;
             case 4:
-                *informationPath = argv[i];
+                *informationPath = (unsigned char*)argv[i];
                 break;
             case 5:
-                *licensePath = argv[i];
+                *licensePath = (unsigned char*)argv[i];
                 break;
             case 6:
                 *days = atoi(argv[i]);

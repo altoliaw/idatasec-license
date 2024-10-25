@@ -17,6 +17,11 @@ include ${CommonTempMakefile}
 # LDFLAGS		=
 # LDLIBS		=
 
+# Replacing terms by using $(.) from Makefile function
+# CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
+# Replacing terms by using $(.) from Makefile function
+# LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
+
 # ######## [Environment Setting]
 # Necessary MakeFile Variables Included
 include ${TempMakefile}

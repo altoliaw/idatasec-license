@@ -13,9 +13,14 @@ include ${CommonTempMakefile}
 # DETAILINFO	=
 # WALL		=
 # FMSG		=
-# CFLAGS		=
+CFLAGS		=-IVendors/libGpG-Error/Includes -IVendors/libGcrypt/Includes
 # LDFLAGS		=
 # LDLIBS		=
+
+# Replacing terms by using $(.) from Makefile function
+CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
+# Replacing terms by using $(.) from Makefile function
+# LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
 
 # ######## [Environment Setting]
 # Necessary MakeFile Variables Included
