@@ -1,11 +1,10 @@
-# The Makefile for SizingController
+# The Makefile for Licenses
 #
 # @author Nick
 # @date 2024/09/24
 
-# ######## [Environment Setting]
-# Necessary MakeFile Variables Included
-include ${TempMakefile}
+# ######## [Necessary Common MakeFile Variables Included]
+include ${CommonTempMakefile}
 
 # If someone feel like using the definitions that users define, please remove the comment and fill in the suitable terms.
 # CC			=
@@ -14,17 +13,26 @@ include ${TempMakefile}
 # DETAILINFO	=
 # WALL		=
 # FMSG		=
-# CFLAGS		=
+CFLAGS		=-IVendors/libGpG-Error/Includes -IVendors/libGcrypt/Includes
+# Replacing terms by using $(.) from Makefile function
 # LDFLAGS		=
 # LDLIBS		=
 
+# Replacing terms by using $(.) from Makefile function
+CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
+# Replacing terms by using $(.) from Makefile function
+# LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
+
+
+# ######## [Environment Setting]
+# Necessary MakeFile Variables Included
+include ${TempMakefile}
 
 # ######## [Variable Definition]
-Models			:=	Sources.SizingController
+Models			:=	Models.Licenses
 Duration		:=
-Sources			:=	${projectDir}/Sources
-Sources.SizingController	:=	${Sources}/SizingController
-
+Licenses.Headers	:=	${projectDir}/Models/Licenses/Headers
+Licenses.Sources	:=	${projectDir}/Models/Licenses/Sources
 
 # ######## [Passing the Variable Definition into the File]
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project);
@@ -44,10 +52,7 @@ IsExisted	:=
 .Phony: all
 all: \
 	startTime \
-	${Sources.SizingController}/SizingMainCallerPrototype.o \
-	${Sources.SizingController}/SizingMainCaller.o \
-	${Sources.SizingController}/LinuxSizingMainCaller.o \
-	${Sources.SizingController}/WindowsSizingMainCaller.o \
+	${Licenses.Sources}/License.o \
 	endTime
 # Adding the Makefile's variables shall be added into the ${TempMakefile} file
 	@make information
@@ -60,10 +65,10 @@ information:
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project) to
 # determine if the variable in the Makefile shall be added into the ${TempMakefile}
 # Using the "eval" to assign the Makefile's variable in the recipe
-	@$(eval IsExisted	:=	$(shell grep -q "^Sources\.SizingController\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
+	@$(eval IsExisted	:=	$(shell grep -q "^Licenses\.Sources\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
 # Adding the variable into the file when the variables do not in the file, the information shall put into the file
 	@if [ "${IsExisted}" != "0" ]; then \
-		echo "Sources.SizingController	:=	${Sources}/SizingController" >> "${TempMakefile}"; \
+		echo "Licenses.Sources	:=	${projectDir}/Models/Licenses/Sources" >> "${TempMakefile}"; \
 	fi
 
 # ######## [Compiling Items]
@@ -74,6 +79,6 @@ startTime:
 endTime:
 	@echo $(shell source ${projectDir}/Shells/compiledStringMessage.sh && echo $$(endingString "${Models}" "${Duration}"))
 
-# SizingMainCaller
-# ${Sources.SizingController}/SizingMainCaller.o:	${Sources.SizingController}/SizingMainCaller.cpp
-# 	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Sources.SizingController}/SizingMainCaller.cpp -c ${FMSG} -o ${Sources.SizingController}/SizingMainCaller.o
+# Licenses.License
+${Licenses.Sources}/License.o:	${Licenses.Sources}/License.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Licenses.Sources}/License.c -c ${FMSG} -o ${Licenses.Sources}/License.o

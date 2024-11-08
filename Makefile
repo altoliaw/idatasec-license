@@ -8,7 +8,7 @@
 OS:= $(shell uname -s)
 SUDO=
 ifeq (${OS}, Linux)
-	SUDO:=sudo
+# SUDO:=sudo
 endif
 
 
@@ -37,7 +37,7 @@ LDLIBS		:= $(shell source ${projectDir}/Shells/iniParser.sh && echo $$(getVariab
 # Replacing terms by using $(.) from Makefile function
 CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
 # Replacing terms by using $(.) from Makefile function
-LDFLAGS		:=$(subst -L,-L${projectDir}/,${LDFLAGS})
+LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
 
 
 # When the platform is not equal to the Linux
@@ -108,6 +108,10 @@ vendor: ${projectDir}/Folders
     # Creating the vendor and related folders by using the function, dependenciesTraversal, 
     # from the shell script, installVendor.sh, and determining the existence of the file & initializing the file
 	@source ${projectDir}/Shells/installVendor.sh && dependenciesTraversal "${projectDir}/Settings/.Json/globalDependencies.json" "${projectDir}/${Vendors}/.${Vendors}.json"
+# This file is for restoring the Makefiles' variables in the compilied process
+	@rm -f ${projectDir}/tmp.mk
+# This file is for restoring the common variables for the compiler
+	@rm -f ${projectDir}/commonTmp.mk
 
 # Displaying the project of the working directory
 .Phony: information
@@ -125,9 +129,8 @@ ifeq ($(OS), Linux)
 # Generating the file and preparing the variables
 	@$(shell > ${TempMakefile})
 	@make -C Models/Commons all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
-	@make -C Models/FileParsers all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
-	@make -C Models/PCAP all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
-	@make -C Sources/SizingController all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
+	@make -C Models/Licenses all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
+	@make -C Sources/LicenseGenerationController all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
 	@make -C Apps all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
 	@make -C Apps/Executions all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
 

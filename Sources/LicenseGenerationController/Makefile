@@ -1,4 +1,4 @@
-# The Makefile for Commons
+# The Makefile for LicenseGenerationController
 #
 # @author Nick
 # @date 2024/09/24
@@ -13,12 +13,12 @@ include ${CommonTempMakefile}
 # DETAILINFO	=
 # WALL		=
 # FMSG		=
-# CFLAGS		=
+CFLAGS		=-IVendors/libGpG-Error/Includes -IVendors/libGcrypt/Includes
 # LDFLAGS		=
 # LDLIBS		=
 
 # Replacing terms by using $(.) from Makefile function
-# CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
+CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
 # Replacing terms by using $(.) from Makefile function
 # LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
 
@@ -27,10 +27,11 @@ include ${CommonTempMakefile}
 include ${TempMakefile}
 
 # ######## [Variable Definition]
-Models			:=	Models.Commons
+Models			:=	Sources.LicenseGenerationController
 Duration		:=
-Commons.Headers	:=	${projectDir}/Models/Commons/Headers
-Commons.Sources	:=	${projectDir}/Models/Commons/Sources
+Sources			:=	${projectDir}/Sources
+Sources.LicenseGenerationController	:=	${Sources}/LicenseGenerationController
+
 
 # ######## [Passing the Variable Definition into the File]
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project);
@@ -50,9 +51,7 @@ IsExisted	:=
 .Phony: all
 all: \
 	startTime \
-	${Commons.Sources}/Time.o \
-	${Commons.Sources}/EncodePrototype.o \
-	${Commons.Sources}/EncodeBase64.o \
+	${Sources.LicenseGenerationController}/LicenseMainCaller.o \
 	endTime
 # Adding the Makefile's variables shall be added into the ${TempMakefile} file
 	@make information
@@ -65,10 +64,10 @@ information:
 # Verifying the content the file, ${TempMakefile} (tmp.mk from the project) to
 # determine if the variable in the Makefile shall be added into the ${TempMakefile}
 # Using the "eval" to assign the Makefile's variable in the recipe
-	@$(eval IsExisted	:=	$(shell grep -q "^Commons\.Sources\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
+	@$(eval IsExisted	:=	$(shell grep -q "^Sources\.LicenseGenerationController\s*\(:\)\?=" "${TempMakefile}"  && echo "$$?"))
 # Adding the variable into the file when the variables do not in the file, the information shall put into the file
 	@if [ "${IsExisted}" != "0" ]; then \
-		echo "Commons.Sources	:=	${projectDir}/Models/Commons/Sources" >> "${TempMakefile}"; \
+		echo "Sources.LicenseGenerationController	:=	${Sources}/LicenseGenerationController" >> "${TempMakefile}"; \
 	fi
 
 # ######## [Compiling Items]
@@ -79,14 +78,6 @@ startTime:
 endTime:
 	@echo $(shell source ${projectDir}/Shells/compiledStringMessage.sh && echo $$(endingString "${Models}" "${Duration}"))
 
-# Commons.Time
-${Commons.Sources}/Time.o:	${Commons.Sources}/Time.c
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/Time.c -c ${FMSG} -o ${Commons.Sources}/Time.o
-
-# Commons.EncodePrototype
-${Commons.Sources}/EncodePrototype.o:	 ${Commons.Sources}/EncodePrototype.c
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/EncodePrototype.c -c ${FMSG} -o ${Commons.Sources}/EncodePrototype.o
-
-# Commons.EncodeBase64
-${Commons.Sources}/EncodeBase64.o:	${Commons.Sources}/EncodeBase64.c
-	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Commons.Sources}/EncodeBase64.c -c ${FMSG} -o ${Commons.Sources}/EncodeBase64.o
+# LicenseMainCaller
+${Sources.LicenseGenerationController}/LicenseMainCaller.o:	${Sources.LicenseGenerationController}/LicenseMainCaller.c
+	${CC} ${STD} ${CMPOPT} ${DETAILINFO} ${WALL} ${CFLAGS} ${Sources.LicenseGenerationController}/LicenseMainCaller.c -c ${FMSG} -o ${Sources.LicenseGenerationController}/LicenseMainCaller.o
