@@ -1041,7 +1041,7 @@ static char generateSignature(const unsigned char* licensePrivateKeyPath, const 
 }
 
 /**
- * Validating the client's information and generating the license; the information is encrypted by using the aesKey
+ * Validating the license information
  *
  * @param instance [License*] The license object
  * @param interfaceName [const unsigned char*] The interface name of the NIC
