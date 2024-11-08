@@ -28,7 +28,7 @@ static const unsigned char base64DecodeTable[256] = {
  * @param instance [EncodeBase64*] The instance of the EncodeBase64
  */
 void EncodeBase64_Construct(EncodeBase64* instance) {
-    EncodePrototype_Construct(&(instance->parent), "EncodeBase64");
+    EncodePrototype_Construct(&(instance->parent), (const unsigned char*)"EncodeBase64");
     (instance->parent).encodeString = &base64Encode;
 	(instance->parent).decodeString = &base64Decode;
 }

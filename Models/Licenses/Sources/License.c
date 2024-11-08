@@ -12,7 +12,6 @@ static char validateLicense(License*, const unsigned char*, const unsigned char*
 
 // Private functions
 static char getMacAddress(const unsigned char*, unsigned char*, const unsigned int);
-static unsigned int encryptLicense(const unsigned char*, const unsigned char*, unsigned char*);
 static char getSecretKey(const unsigned char*, unsigned char*, unsigned int);
 static void applyPkcs7Padding(const unsigned char*, size_t, unsigned char**, size_t*);
 static char aes256CbcEncrypt(const unsigned char*, size_t, const unsigned char*, unsigned char*, unsigned char**, size_t*);
@@ -53,6 +52,8 @@ void License_Construct(License* instance) {
             (instance->valueForGlobalLicenseFields)[i][0] = '\0';
         }
     }
+    instance->remainingDays = 0;
+
     // Linking the function pointer to the function (public)
     instance->generateAES256Key = &generateAES256Key;
     instance->generateClientInformation = &generateClientInformation;
@@ -77,6 +78,7 @@ void License_Destruct(License* instance) {
             instance->valueForGlobalLicenseFields = NULL;
         }
     }
+    instance->remainingDays = 0;
 
     // Destroying the function pointer
     instance->generateAES256Key = NULL;
@@ -110,7 +112,7 @@ static char generateAES256Key(License* instance, const unsigned char* interfaceN
     // Putting the MAC address into the field, secretKey
     unsigned int cumulativeLength = 0;
     for (unsigned int i = 0; i < macAddressLength; i++) {
-        cumulativeLength += sprintf((instance->secretKey) + cumulativeLength, "%02x", macAddress[i]);
+        cumulativeLength += sprintf((char*)(instance->secretKey) + cumulativeLength, "%02x", macAddress[i]);
     }
     memcpy(instance->macAddress, instance->secretKey, LICENSE_MAC_ADDRESS);  // Copying the MAC address
 
@@ -125,7 +127,7 @@ static char generateAES256Key(License* instance, const unsigned char* interfaceN
     // the wrong memory location and be exceed the boundary.
     unsigned char tmpBuffer[3] = {'\0'};
     for (unsigned int i = 0, j = 0; i < remainderHexSize; i++) {
-        j = sprintf(tmpBuffer, "%02x", randomBuffer[i]);
+        j = sprintf((char*)tmpBuffer, "%02x", randomBuffer[i]);
         memcpy((instance->secretKey) + cumulativeLength, tmpBuffer, 2);
         cumulativeLength += j;
     }
@@ -146,12 +148,17 @@ static char generateAES256Key(License* instance, const unsigned char* interfaceN
     }
 
     // Key file generation
-    FILE* fileDescriptor = fopen(path, "rb");
+    FILE* fileDescriptor = fopen((const char*)path, "rb");
     if (fileDescriptor) {  // When the key file exists, ...
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED
+                "The AES key file exists. The key will not be regenerated. "
+                "If supervisors feel like regenerating the key, "
+                "please remove the key file." TERMINAL_OUTPUT_COLOR_RESET
+                "\n");
         fclose(fileDescriptor);
         fileDescriptor = NULL;
     } else {  // When the key file does not exist, ...
-        fileDescriptor = fopen(path, "wb");
+        fileDescriptor = fopen((char*)path, "wb");
         fwrite(instance->secretKey, sizeof(unsigned char), LICENSE_AES_KEY_SIZE, fileDescriptor);
     }
 
@@ -181,7 +188,7 @@ static char getMacAddress(const unsigned char* interfaceName, unsigned char* mac
 
     // Assigning the NIC name to the field of the interface request
     struct ifreq interfaceRequest;
-    strncpy(interfaceRequest.ifr_name, interfaceName, IFNAMSIZ - 1);
+    strncpy(interfaceRequest.ifr_name, (const char*)interfaceName, IFNAMSIZ - 1);
     interfaceRequest.ifr_name[IFNAMSIZ - 1] = '\0';
 
     // Determining if the MAC address can be obtained
@@ -227,7 +234,7 @@ static char generateClientInformation(License* instance,
     // Putting the MAC address into the field, instance->macAddress
     unsigned char tmpBuffer[3] = {'\0'};
     for (unsigned int i = 0; i < macAddressLength; i++) {
-        sprintf(tmpBuffer, "%02x", macAddress[i]);
+        sprintf((char*)tmpBuffer, "%02x", macAddress[i]);
         memcpy(instance->macAddress + (i * 2), tmpBuffer, 2);  // Copying the MAC address
     }
 
@@ -238,12 +245,12 @@ static char generateClientInformation(License* instance,
     Time_Destruct(&timeInstance);
 
     // The message format layout of the plaintext, assembling from the macro
-    const unsigned char* licenseMessage = LICENSE_CONTENT_MESSAGE;
+    const unsigned char* licenseMessage = (const unsigned char*)LICENSE_CONTENT_MESSAGE;
 
     // Printing the string into the memory
     unsigned int cumulativeLength = 0;
-    cumulativeLength = sprintf(instance->licenseContents,
-                               licenseMessage,
+    cumulativeLength = sprintf((char*)instance->licenseContents,
+                               (const char*)licenseMessage,
                                LICENSE_MAC_ADDRESS, instance->macAddress,  // %.*s
                                currentTimeEpoch);
 
@@ -265,10 +272,10 @@ static char generateClientInformation(License* instance,
                      &ciphertextLength);
 
     // Preparing the encrypted message format
-    const unsigned char* encryptedLicenseMessage = "%.*s\n%.*s\n";
+    const unsigned char* encryptedLicenseMessage = (const unsigned char*)"%.*s\n%.*s\n";
     cumulativeLength = 0;
-    cumulativeLength = sprintf(instance->licenseContents,
-                               encryptedLicenseMessage,
+    cumulativeLength = sprintf((char*)instance->licenseContents,
+                               (const char*)encryptedLicenseMessage,
                                ciphertextLength, ciphertext,       // %.*s
                                LICENSE_AES_KEY_SIZE, instance->iv  // %.*s
     );
@@ -320,7 +327,7 @@ static char getSecretKey(const unsigned char* filePath, unsigned char* key, unsi
     unsigned char temp[LICENSE_LICENSE_CONTENTS_LENGTH] = {'\0'};
     // "fgets(.)" will obtain n - 1 characters; that is when users feel like obtaining n
     // characters, the second argument in the fgets(.) shall be equal to n + 1
-    if (fgets(temp, keyLength + 1, fileDescriptor) == NULL) {
+    if (fgets((char*)temp, keyLength + 1, fileDescriptor) == NULL) {
         fprintf(stderr, "The aes key file does not exist.\n");
         return (isSuccess = 0x1);
     }
@@ -397,7 +404,7 @@ static char aes256CbcEncrypt(const unsigned char* plaintext,
     unsigned char tmpBuff[3] = {'\0'};
     for (int i = 0; i < paddedLen; i++) {
         tmpLength = cumulativeLength;
-        cumulativeLength += sprintf(tmpBuff, "%02x", originalCiphertext[i]);
+        cumulativeLength += sprintf((char*)tmpBuff, "%02x", originalCiphertext[i]);
         memcpy((*ciphertext) + tmpLength, tmpBuff, 2);
     }
     *ciphertextLen = cumulativeLength;
@@ -408,7 +415,7 @@ static char aes256CbcEncrypt(const unsigned char* plaintext,
     cumulativeLength = tmpLength = 0;
     for (int i = 0; i < LICENSE_BLOCK_SIZE; i++) {
         tmpLength = cumulativeLength;
-        cumulativeLength += sprintf(tmpBuff, "%02x", originalIV[i]);
+        cumulativeLength += sprintf((char*)tmpBuff, "%02x", originalIV[i]);
         memcpy(iv + tmpLength, tmpBuff, 2);
     }
 
@@ -455,13 +462,13 @@ static char aes256CbcDecrypt(const unsigned char* ciphertext,
     if (originalCiphertext == NULL) {
         originalCiphertext = calloc(ciphertextLen, sizeof(unsigned char));
     }
-
+    
     // Using sscanf(.) to convert hex values into unsigned char string
     unsigned long cumulativeLength = 0;
     unsigned int tmpBuff = 0;  // For reserving the temporary memory
     for (int i = 0; i < ciphertextLen; i += 2) {
         // Parsing two characters as a hex value and converting the hex value to a decimal value
-        sscanf(ciphertext + i, "%02x", &tmpBuff);
+        sscanf(((const char*)ciphertext) + i, "%02x", &tmpBuff);
         originalCiphertext[cumulativeLength] = (unsigned char)tmpBuff;
         cumulativeLength++;
     }
@@ -473,7 +480,7 @@ static char aes256CbcDecrypt(const unsigned char* ciphertext,
     // memcpy(originalIV, iv, LICENSE_BLOCK_SIZE);  // Copying the iv value into the temp storage
     cumulativeLength = tmpBuff = 0;
     for (int i = 0; i < LICENSE_AES_KEY_SIZE; i += 2) {
-        sscanf(iv + i, "%02x", &tmpBuff);
+        sscanf(((const char*)iv) + i, "%02x", &tmpBuff);
         originalIV[cumulativeLength] = (unsigned char)tmpBuff;
         cumulativeLength++;
     }
@@ -573,7 +580,7 @@ static char validateInformation(License* instance,
                                 const unsigned char* informationPath,
                                 const unsigned char* aesKeyPath) {
     // Obtaining the information of the license
-    FILE* fileDescriptor = fopen(informationPath, "rb");
+    FILE* fileDescriptor = fopen((const char*)informationPath, "rb");
     if (fileDescriptor == NULL) {
         fprintf(stderr, "The license does not exist.\n");
         return 0x1;
@@ -586,7 +593,7 @@ static char validateInformation(License* instance,
         // Obtaining the content from a line
         while (fgets((char*)buffer, LICENSE_LICENSE_CONTENTS_LENGTH + 1, fileDescriptor) != NULL) {
             // Assigning the information to suitable variable
-            unsigned long length = strlen(buffer);
+            unsigned long length = strlen((char*)buffer);
             switch ((int)counter) {
                 case 0:  // The information of the license contents
                     memcpy(instance->licenseContents, buffer, LICENSE_LICENSE_CONTENTS_LENGTH);
@@ -626,15 +633,16 @@ static char validateInformation(License* instance,
     unsigned char* plaintext = NULL;  // The variable shall be deallocated manually
     size_t plaintextLen = 0;
     aes256CbcDecrypt((const unsigned char*)instance->licenseContents,
-                     strlen((unsigned char*)instance->licenseContents),
+                     strlen((char*)instance->licenseContents),
                      (const unsigned char*)instance->secretKey,
                      instance->iv,
                      &plaintext,
                      &plaintextLen);
+
     // Parser definition
-    const unsigned char* keyValueDelimiter = ":";
+    const unsigned char* keyValueDelimiter = (const unsigned char*)":";
     const unsigned short keyValueDelimiterLength = (unsigned short)strlen((char*)keyValueDelimiter);
-    const unsigned char* rowDelimiter = "\n";
+    const unsigned char* rowDelimiter = (const unsigned char*)"\n";
     const unsigned short rowDelimiterLength = (unsigned short)strlen((char*)rowDelimiter);
     // Parsing the contents
     execKeyValueParser(plaintext, plaintextLen, globalLicenseFields, instance->valueForGlobalLicenseFieldsLength,
@@ -785,14 +793,18 @@ static char generateAsymmetricKeyValuePair(License* instance, const unsigned cha
     unsigned int length = strlen((char*)path);
     unsigned char extension[LICENSE_LICENSE_CONTENTS_LENGTH] = {'\0'};
     memcpy(extension, path, length);
-    unsigned char* term = ".pem";
-    strcpy(extension + length, term);  // The '\0' will be copied from the term.
+    const unsigned char* term = (const unsigned char*)".pem";
+    strcpy(((char*)extension) + length, (const char*)term);  // The '\0' will be copied from the term.
 
     // Layout the keys
     FILE* fileDescriptor = fopen((char*)extension, "rb");
     if (fileDescriptor != NULL) {
-        fprintf(stderr, "RSA key exists.\n");
-        isSuccess = 0x1;
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED
+                "RSA key exists, the key pair will not be regenerated; "
+                "if supervisors feel like regenerating the key pairs, "
+                "please reassign the location of the baseNameLicenseKeyPairPath" TERMINAL_OUTPUT_COLOR_RESET
+                "\n");
+        isSuccess = 0x0;
         fclose(fileDescriptor);
     } else {
         unsigned char contents[LICENSE_LICENSE_CONTENTS_LENGTH] = {'\0'};
@@ -801,20 +813,20 @@ static char generateAsymmetricKeyValuePair(License* instance, const unsigned cha
         fileDescriptor = fopen((char*)extension, "wb");
         // fprintf(fileDescriptor, "-----BEGIN RSA PRIVATE KEY-----\n");
         gcry_sexp_sprint(privateKey, GCRYSEXP_FMT_ADVANCED, contents, privateKeyLength);
-        fwrite(contents, 1, privateKeyLength, fileDescriptor);;
+        fwrite(contents, 1, privateKeyLength, fileDescriptor);
+        ;
         // fprintf(fileDescriptor, "\n-----END RSA PRIVATE KEY-----\n");
         fclose(fileDescriptor);
 
         // Public key
-        unsigned char* term = ".pub";
-        strcpy(extension + length, term);  // The '\0' will be copied from the term.
+        const unsigned char* term = (const unsigned char*)".pub";
+        strcpy(((char*)extension) + length, (const char*)term);  // The '\0' will be copied from the term.
         fileDescriptor = fopen((char*)extension, "wb");
         // fprintf(fileDescriptor, "-----BEGIN RSA PUBLIC KEY-----\n");
         gcry_sexp_sprint(publicKey, GCRYSEXP_FMT_ADVANCED, contents, publicKeyLength);
         fwrite(contents, 1, publicKeyLength, fileDescriptor);
         // fprintf(fileDescriptor, "\n-----END RSA PUBLIC KEY-----\n");
         fclose(fileDescriptor);
-        
     }
 
     {  // Releasing the memory
@@ -870,11 +882,11 @@ static char generateLicense(License* instance,
     }
 
     // The layout of the content of the license
-    const unsigned char* licenseMessage = LICENSE_CONTENT_MESSAGE_WITH_SIGNATURE;
+    const unsigned char* licenseMessage = (const unsigned char*)LICENSE_CONTENT_MESSAGE_WITH_SIGNATURE;
     // Printing the string into the memory
     unsigned int cumulativeLength = 0;
-    cumulativeLength = sprintf(instance->licenseContents,
-                               licenseMessage,
+    cumulativeLength = sprintf((char*)instance->licenseContents,
+                               (const char*)licenseMessage,
                                LICENSE_MAC_ADDRESS, (instance->valueForGlobalLicenseFields)[0],  // %.*s
                                currentTimeEpoch,
                                currentTimeEpoch + days);
@@ -903,10 +915,10 @@ static char generateLicense(License* instance,
     codeInstance.parent.encodeString(signature, (const unsigned long)signatureLength, &encodedSignature, &encodedLength);
     EncodeBase64_Destruct(&codeInstance);
     // Preparing the encrypted message format
-    const unsigned char* encryptedLicenseMessage = "%.*s\n%.*s\n%.*s\n";
+    const unsigned char* encryptedLicenseMessage = (const unsigned char*)"%.*s\n%.*s\n%.*s\n";
     cumulativeLength = 0;
-    cumulativeLength = sprintf(instance->licenseContents,
-                               encryptedLicenseMessage,
+    cumulativeLength = sprintf((char*)instance->licenseContents,
+                               (const char*)encryptedLicenseMessage,
                                ciphertextLength, ciphertext,        // %.*s
                                LICENSE_AES_KEY_SIZE, instance->iv,  // %.*s
                                encodedLength, encodedSignature      // %.*s
@@ -915,6 +927,12 @@ static char generateLicense(License* instance,
     // Generating the license file
     FILE* fileDescriptor = fopen((const char*)licensePath, "rb");
     if (fileDescriptor != NULL) {  // If the license file exists, ...
+        fprintf(stderr, TERMINAL_OUTPUT_COLOR_RED
+                "The license file exists, the license will not be regenerated. "
+                "If supervisors feel like regenerating the license, "
+                "please reassign the location of the licensePath" 
+                TERMINAL_OUTPUT_COLOR_RESET
+                "\n");
         fclose(fileDescriptor);
         fileDescriptor = NULL;
     } else {  // If the license file does not exist, ...
@@ -943,6 +961,7 @@ static char generateLicense(License* instance,
             encodedSignature = NULL;
         }
     }
+    return isSuccess;
 }
 
 /**
@@ -963,7 +982,7 @@ static char generateLicense(License* instance,
 static char generateSignature(const unsigned char* licensePrivateKeyPath, const unsigned char* dataToSign, const unsigned int dataToSignLength,
                               unsigned char** signature, unsigned int* signatureLength) {
     // Opening the private key file
-    FILE* fileDescriptor = fopen(licensePrivateKeyPath, "rb");
+    FILE* fileDescriptor = fopen((const char*)licensePrivateKeyPath, "rb");
     if (fileDescriptor == NULL) {
         perror("Failed to open private key file\n");
         return 0x1;
@@ -1025,7 +1044,7 @@ static char generateSignature(const unsigned char* licensePrivateKeyPath, const 
 }
 
 /**
- * Validating the client's information and generating the license; the information is encrypted by using the aesKey
+ * Validating the license information
  *
  * @param instance [License*] The license object
  * @param interfaceName [const unsigned char*] The interface name of the NIC
@@ -1039,7 +1058,7 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
                             const unsigned char* licensePath, const unsigned char* aesKeyPath) {
     char isSuccess = 0x0;
     // Opening the private key file
-    FILE* fileDescriptor = fopen(licensePublicKeyPath, "rb");
+    FILE* fileDescriptor = fopen((const char*)licensePublicKeyPath, "rb");
     if (fileDescriptor == NULL) {
         perror("Failed to open private key file\n");
         return 0x1;
@@ -1075,7 +1094,7 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
     //     fprintf(stderr, "%d: %s\n", i, (instance->valueForGlobalLicenseFields)[i]);
     // }
 
-    // Verifying all information; the phase are as follows: 1) comparing with the verification code, 2) comparing with the MAC address, 
+    // Verifying all information; the phase are as follows: 1) comparing with the verification code, 2) comparing with the MAC address,
     // and 3) comparing with the expiration date
 
     // 1) Comparing with the verification code
@@ -1146,10 +1165,10 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
         // Putting the MAC address into the field
         unsigned char tmpBuffer[3] = {'\0'};
         for (int i = macAddressLength - 1; i >= 0; i--) {
-            sprintf(tmpBuffer, "%02x", macAddress[i]);
+            sprintf((char*)tmpBuffer, "%02x", macAddress[i]);
             memcpy(macAddress + (i * 2), tmpBuffer, 2);  // Copying the MAC address
         }
-        
+
         // Comparing the MAC address
         for (unsigned int i = 0; i < macAddressLength * 2; i++) {
             if (macAddress[i] != decryptedMacAddress[i]) {
@@ -1166,37 +1185,38 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
         unsigned char* decryptedDeadline = (unsigned char*)((instance->valueForGlobalLicenseFields)[2]);
         unsigned long deadlineTimeEpoch = 0;
         {  // Verifying the number format by using regular expression
-        regex_t regex;
-        const char* pattern = "^[0-9]+$";
-        int result = regcomp(&regex, pattern, REG_EXTENDED);
-        isSuccess |= ((result == 0) ? 0x0 : 0x1);
+            regex_t regex;
+            const char* pattern = "^[0-9]+$";
+            int result = regcomp(&regex, pattern, REG_EXTENDED);
+            isSuccess |= ((result == 0) ? 0x0 : 0x1);
 
-        result = regexec(&regex, (char*)decryptedDeadline, 0, NULL, 0);
-        isSuccess |= ((result == 0) ? 0x0 : 0x1);
+            result = regexec(&regex, (char*)decryptedDeadline, 0, NULL, 0);
+            isSuccess |= ((result == 0) ? 0x0 : 0x1);
 
-        char* errorPointer;
-        // Transforming a character from the source string into a numeric value
-        if (isSuccess != 0x0) {
-            fprintf(stderr, "The expired time format is illegal.\n");
-            isSuccess = 0x1;
-        } else {
-
-            deadlineTimeEpoch = strtol((char*)decryptedDeadline, &errorPointer, 10);
-            Time timeInstance;
-            Time_Construct(&timeInstance);
-            unsigned long currentTimeEpoch = timeInstance.getEpoch(&timeInstance, 0);
-            Time_Destruct(&timeInstance);
-
-            if (currentTimeEpoch > deadlineTimeEpoch) {
-                fprintf(stderr, "The license has been expired. Please contact the supplier. \n");
+            char* errorPointer;
+            // Transforming a character from the source string into a numeric value
+            if (isSuccess != 0x0) {
+                fprintf(stderr, "The expired time format is illegal.\n");
                 isSuccess = 0x1;
+            } else {
+                deadlineTimeEpoch = strtol((char*)decryptedDeadline, &errorPointer, 10);
+                Time timeInstance;
+                Time_Construct(&timeInstance);
+                unsigned long currentTimeEpoch = timeInstance.getEpoch(&timeInstance, 0);
+                Time_Destruct(&timeInstance);
+
+                if (currentTimeEpoch > deadlineTimeEpoch) {
+                    fprintf(stderr, "The license has been expired. Please contact the supplier. \n");
+                    isSuccess = 0x1;
+                    instance->remainingDays = (currentTimeEpoch - deadlineTimeEpoch)/ 86400;
+                } else {
+                    instance->remainingDays = (deadlineTimeEpoch - currentTimeEpoch)/ 86400;
+                }
+            }
+            {  // Releasing memory deallocation manually
+                regfree(&regex);
             }
         }
-        {  // Releasing memory deallocation manually
-            regfree(&regex);
-        }
-    }
-
     }
 
     {  // Releasing memory deallocation manually
@@ -1205,5 +1225,41 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
             pemData = NULL;
         }
     }
+    return isSuccess;
+}
+
+/**
+ * The function for the out caller of the license verification
+ * 
+ * @param projectDirPath [const unsigned char*] The project directory path (e.g.,  "/home/dbsecure/DAM/SecuEyes")
+ * @param interfaceName [const unsigned char*] The interface name
+ * @param licensePublicKeyPath [const unsigned char*] The file path for the public key (license key pairs)
+ * @param licensePath [const unsigned char*] The file path for the license
+ * @param remainingDays [int*] The remaining days for the license; when the value is positive value, the remaining days exist; when the value is negative value, 
+ * the license has been expired
+ * @return [char] 0x0: success, 0x1: failure
+ */
+char licenseCaller(const unsigned char* projectDirPath, const unsigned char* interfaceName, const unsigned char* licensePublicKeyPath, const unsigned char* licensePath, int* remainingDays) {
+    char isSuccess = 0x0;
+    License licenseInstance;
+    License_Construct(&licenseInstance);
+    const unsigned char* postfixAes256KeyPath = (const unsigned char*)"/etc/.aes256Key.aes";
+	unsigned char* aes256KeyPath = NULL;
+    size_t length = (size_t) strlen((char*)projectDirPath) + (size_t)strlen((char*)postfixAes256KeyPath) + 1; // 1 is for '\0'
+
+    // Allocating the memory for the aes256KeyPath
+    aes256KeyPath = calloc(length, sizeof(unsigned char));
+    // Assembling the "aes256KeyPath" path
+    memcpy(aes256KeyPath, projectDirPath, (size_t) strlen((char*)projectDirPath));
+    memcpy(aes256KeyPath + strlen((char*)projectDirPath), postfixAes256KeyPath, (size_t) strlen((char*)postfixAes256KeyPath));
+    aes256KeyPath[length - 1] = '\0';
+
+    // Validating the license
+	isSuccess |= licenseInstance.validateLicense(&licenseInstance, interfaceName, licensePublicKeyPath, licensePath, aes256KeyPath);
+    *remainingDays = licenseInstance.remainingDays;
+    // Releasing the memory
+    (aes256KeyPath != NULL)? free(aes256KeyPath): NULL;
+
+    License_Destruct(&licenseInstance);
     return isSuccess;
 }

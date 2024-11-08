@@ -8,7 +8,7 @@
 OS:= $(shell uname -s)
 SUDO=
 ifeq (${OS}, Linux)
-	SUDO:=sudo
+# SUDO:=sudo
 endif
 
 
@@ -37,7 +37,7 @@ LDLIBS		:= $(shell source ${projectDir}/Shells/iniParser.sh && echo $$(getVariab
 # Replacing terms by using $(.) from Makefile function
 CFLAGS		:=	$(subst -I,-I${projectDir}/,${CFLAGS})
 # Replacing terms by using $(.) from Makefile function
-LDFLAGS		:=$(subst -L,-L${projectDir}/,${LDFLAGS})
+LDFLAGS		:= $(subst -L,-L${projectDir}/,${LDFLAGS})
 
 
 # When the platform is not equal to the Linux
@@ -129,9 +129,8 @@ ifeq ($(OS), Linux)
 # Generating the file and preparing the variables
 	@$(shell > ${TempMakefile})
 	@make -C Models/Commons all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
-	@make -C Models/FileParsers all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
-	@make -C Models/PCAP all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
-	@make -C Sources/SizingController all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
+	@make -C Models/Licenses all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
+	@make -C Sources/LicenseGenerationController all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
 	@make -C Apps all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
 	@make -C Apps/Executions all projectDir='${projectDir}' ARGUMENTS='${ARGUMENTS}' TempMakefile='${TempMakefile}' CommonTempMakefile='${CommonTempMakefile}'
 

@@ -52,7 +52,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/Outputs DESTINATION ${CMAKE_BINARY_DIR})
 # [Included Directories]
 ## Opening the subdirectory for the next works
 add_subdirectory(Models)
-# add_subdirectory(Sources)
+add_subdirectory(Sources)
 
 ## When the testing function is set as "ON"
 if (BUILD_TEST)

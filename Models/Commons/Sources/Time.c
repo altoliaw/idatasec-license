@@ -171,7 +171,7 @@ static void getEpochToString(Time* instance, const char* format, Timezone zone, 
         (*timeEpochString)[0] = '\0';
     }
 
-     strftime(*timeEpochString, (size_t)length, format, tm);
+     strftime((char*)(*timeEpochString), (size_t)length, format, tm);
 }
 
 
