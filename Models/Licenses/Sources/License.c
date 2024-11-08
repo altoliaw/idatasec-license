@@ -52,6 +52,8 @@ void License_Construct(License* instance) {
             (instance->valueForGlobalLicenseFields)[i][0] = '\0';
         }
     }
+    instance->remainingDays = 0;
+
     // Linking the function pointer to the function (public)
     instance->generateAES256Key = &generateAES256Key;
     instance->generateClientInformation = &generateClientInformation;
@@ -76,6 +78,7 @@ void License_Destruct(License* instance) {
             instance->valueForGlobalLicenseFields = NULL;
         }
     }
+    instance->remainingDays = 0;
 
     // Destroying the function pointer
     instance->generateAES256Key = NULL;
@@ -1205,6 +1208,9 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
                 if (currentTimeEpoch > deadlineTimeEpoch) {
                     fprintf(stderr, "The license has been expired. Please contact the supplier. \n");
                     isSuccess = 0x1;
+                    instance->remainingDays = (currentTimeEpoch - deadlineTimeEpoch)/ 86400;
+                } else {
+                    instance->remainingDays = (deadlineTimeEpoch - currentTimeEpoch)/ 86400;
                 }
             }
             {  // Releasing memory deallocation manually
@@ -1219,5 +1225,40 @@ static char validateLicense(License* instance, const unsigned char* interfaceNam
             pemData = NULL;
         }
     }
+    return isSuccess;
+}
+
+/**
+ * The function for the out caller of the license verification
+ * 
+ * @param projectDirPath [const unsigned char*] The project directory path (e.g.,  "/home/dbsecure/DAM/SecuEyes")
+ * @param interfaceName [const unsigned char*] The interface name
+ * @param licensePublicKeyPath [const unsigned char*] The file path for the public key (license key pairs)
+ * @param licensePath [const unsigned char*] The file path for the license
+ * @param remainingDays [int*] The remaining days for the license; when the value is positive value, the remaining days exist; when the value is negative value, 
+ * the license has been expired
+ * @return [char] 0x0: success, 0x1: failure
+ */
+char licenseCaller(const unsigned char* projectDirPath, const unsigned char* interfaceName, const unsigned char* licensePublicKeyPath, const unsigned char* licensePath, int* remainingDays) {
+    char isSuccess = 0x0;
+    License licenseInstance;
+    License_Construct(&licenseInstance);
+    const unsigned char* postfixAes256KeyPath = (const unsigned char*)"/etc/.aes256Key.aes";
+	unsigned char* aes256KeyPath = NULL;
+    size_t length = (size_t) strlen((char*)projectDirPath) + (size_t)strlen((char*)postfixAes256KeyPath) + 1; // 1 is for '\0'
+
+    // Allocating the memory for the aes256KeyPath
+    aes256KeyPath = calloc(length, sizeof(unsigned char));
+    // Assembling the "aes256KeyPath" path
+    memcpy(aes256KeyPath, projectDirPath, (size_t) strlen((char*)projectDirPath));
+    memcpy(aes256KeyPath + strlen((char*)projectDirPath), postfixAes256KeyPath, (size_t) strlen((char*)postfixAes256KeyPath));
+    aes256KeyPath[length - 1] = '\0';
+
+    // Validating the license
+	isSuccess |= licenseInstance.validateLicense(&licenseInstance, interfaceName, licensePublicKeyPath, licensePath, aes256KeyPath);
+    // Releasing the memory
+    (aes256KeyPath != NULL)? free(aes256KeyPath): NULL;
+
+    License_Destruct(&licenseInstance);
     return isSuccess;
 }

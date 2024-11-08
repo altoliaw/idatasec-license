@@ -67,6 +67,8 @@ struct License {
     unsigned char** valueForGlobalLicenseFields;
     // The length for the array above
     unsigned short valueForGlobalLicenseFieldsLength;
+    // The remaining days for the license
+    int remainingDays;
     // The AES secret key
     unsigned char secretKey[LICENSE_AES_KEY_SIZE];
     // The iv value for AES; the size is equal to 2 * LICENSE_BLOCK_SIZE
@@ -95,3 +97,6 @@ struct License {
 void License_Construct(License*);
 // License destructor
 void License_Destruct(License*);
+
+// The function for the public license caller
+char licenseCaller(const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*, int*);
