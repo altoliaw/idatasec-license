@@ -1256,6 +1256,7 @@ char licenseCaller(const unsigned char* projectDirPath, const unsigned char* int
 
     // Validating the license
 	isSuccess |= licenseInstance.validateLicense(&licenseInstance, interfaceName, licensePublicKeyPath, licensePath, aes256KeyPath);
+    *remainingDays = licenseInstance.remainingDays;
     // Releasing the memory
     (aes256KeyPath != NULL)? free(aes256KeyPath): NULL;
 
